@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The text-expansion engine (keyboard hook, paste, storage, settings), shared by every app that hosts it. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <!-- Only for the clipboard (System.Windows.Forms.Clipboard); works under any UI framework's STA thread. -->
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>TextExpander</RootNamespace>
+  </PropertyGroup>
+
+</Project>

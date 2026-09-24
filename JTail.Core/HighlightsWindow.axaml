@@ -1,0 +1,27 @@
+<Window x:Class="JTail.HighlightsWindow"
+        xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Line Highlights"
+        Width="380"
+        SizeToContent="Height"
+        CanResize="False"
+        Background="{DynamicResource JBackgroundBrush}"
+        WindowStartupLocation="CenterOwner">
+    <StackPanel Margin="16" Spacing="12">
+        <TextBlock Text="Lines containing a word below are highlighted with its color."
+                   Foreground="{DynamicResource JTextBrush}"
+                   TextWrapping="Wrap" />
+        <StackPanel Name="RulesList" Spacing="8" />
+        <Border BorderBrush="{DynamicResource JBorderBrush}" BorderThickness="0,1,0,0" Padding="0,12,0,0">
+            <StackPanel Spacing="8">
+                <TextBlock Text="Add a rule" Foreground="{DynamicResource JTextBrush}" />
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBox Name="NewWordTextBox" Width="150" Watermark="Word to match" />
+                    <ColorPicker Name="NewColorPicker" />
+                    <Button Name="AddButton" Content="Add" Click="OnAddClick" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+        <Button Name="CloseButton" Content="Close" HorizontalAlignment="Right" Click="OnCloseClick" />
+    </StackPanel>
+</Window>

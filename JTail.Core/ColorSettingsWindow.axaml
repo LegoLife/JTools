@@ -1,0 +1,29 @@
+<Window x:Class="JTail.ColorSettingsWindow"
+        xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Log Colors"
+        Width="340"
+        SizeToContent="Height"
+        CanResize="False"
+        Background="{DynamicResource JBackgroundBrush}"
+        WindowStartupLocation="CenterOwner">
+    <StackPanel Margin="16" Spacing="12">
+        <StackPanel Spacing="4">
+            <TextBlock Text="Background" Foreground="{DynamicResource JTextBrush}" />
+            <ColorPicker Name="BackgroundPicker" HorizontalAlignment="Left" />
+        </StackPanel>
+        <StackPanel Spacing="4">
+            <TextBlock Text="Text" Foreground="{DynamicResource JTextBrush}" />
+            <ColorPicker Name="TextPicker" HorizontalAlignment="Left" />
+        </StackPanel>
+        <TextBlock Name="ContrastWarningText"
+                   Text="Low contrast: background and text are hard to tell apart."
+                   Foreground="{DynamicResource JWarningTextBrush}"
+                   TextWrapping="Wrap"
+                   IsVisible="False" />
+        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+            <Button Name="ResetButton" Content="Reset to Default" Click="OnResetClick" />
+            <Button Name="CloseButton" Content="Close" Click="OnCloseClick" />
+        </StackPanel>
+    </StackPanel>
+</Window>

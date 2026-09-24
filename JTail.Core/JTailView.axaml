@@ -1,0 +1,80 @@
+<UserControl x:Class="JTail.JTailView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{DynamicResource JBackgroundBrush}"
+             DragDrop.AllowDrop="True">
+    <UserControl.Styles>
+        <Style Selector="Menu">
+            <Setter Property="Background" Value="{DynamicResource JBackgroundBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource JTextBrush}" />
+        </Style>
+        <Style Selector="MenuItem">
+            <Setter Property="Foreground" Value="{DynamicResource JTextBrush}" />
+        </Style>
+        <Style Selector="Separator">
+            <Setter Property="Background" Value="{DynamicResource JBorderBrush}" />
+        </Style>
+
+        <!-- File tab headers (built in LogTabItem) -->
+        <Style Selector="Border.logTab">
+            <Setter Property="Padding" Value="10,6" />
+            <Setter Property="Background" Value="{DynamicResource JBackgroundBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource JBorderBrush}" />
+            <Setter Property="BorderThickness" Value="0,0,0,2" />
+        </Style>
+        <Style Selector="Border.logTab.selected">
+            <Setter Property="Background" Value="{DynamicResource JSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource JAccentBrush}" />
+        </Style>
+        <Style Selector="TextBlock.logTabTitle">
+            <Setter Property="Foreground" Value="{DynamicResource JTextBrush}" />
+            <Setter Property="FontFamily" Value="Consolas,Cascadia Mono,Menlo,monospace" />
+        </Style>
+        <Style Selector="Button.logTabClose">
+            <Setter Property="Foreground" Value="{DynamicResource JTextDimBrush}" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+    </UserControl.Styles>
+    <Grid RowDefinitions="Auto,*,Auto">
+        <Menu Grid.Row="0" Name="MainMenu">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Open..." Name="OpenMenuItem" HotKey="Ctrl+O" InputGesture="Ctrl+O" Click="OnOpenClick" />
+                <MenuItem Header="_Recent Files" Name="RecentFilesMenuItem">
+                    <MenuItem Header="(no recent files)" IsEnabled="False" />
+                </MenuItem>
+                <Separator />
+                <MenuItem Header="E_xit" Name="ExitMenuItem" Click="OnExitClick" />
+            </MenuItem>
+            <MenuItem Header="_View">
+                <MenuItem Header="_Colors..." Name="ColorsMenuItem" Click="OnColorsClick" />
+                <MenuItem Header="_Font..." Name="FontMenuItem" Click="OnFontClick" />
+                <MenuItem Header="_Highlights..." Name="HighlightsMenuItem" Click="OnHighlightsClick" />
+            </MenuItem>
+        </Menu>
+        <Grid Grid.Row="1">
+            <DockPanel Name="TabsPanel" LastChildFill="True" IsVisible="False">
+                <Border DockPanel.Dock="Top" Background="{DynamicResource JBackgroundBrush}"
+                        BorderBrush="{DynamicResource JBorderBrush}" BorderThickness="0,0,0,1">
+                    <StackPanel Name="TabStrip" Orientation="Horizontal" />
+                </Border>
+                <Panel Name="TabContentHost" Background="{DynamicResource JBackgroundBrush}" />
+            </DockPanel>
+            <TextBlock Name="EmptyStateText"
+                       Text="Drag a log file here, or File → Open... (Ctrl+O)"
+                       Foreground="{DynamicResource JTextDimBrush}"
+                       FontFamily="Consolas,Cascadia Mono,Menlo,monospace"
+                       FontSize="14"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Cursor="Hand"
+                       PointerPressed="OnEmptyStateClick" />
+        </Grid>
+        <Border Grid.Row="2" Background="{DynamicResource JBackgroundBrush}"
+                BorderBrush="{DynamicResource JBorderBrush}" BorderThickness="0,1,0,0" Padding="8,4">
+            <CheckBox Name="AutoScrollCheckBox"
+                      Content="Auto-scroll"
+                      Foreground="{DynamicResource JTextBrush}"
+                      IsChecked="True" />
+        </Border>
+    </Grid>
+</UserControl>

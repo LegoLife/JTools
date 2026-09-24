@@ -1,0 +1,112 @@
+<UserControl x:Class="JTools.TextExpanderView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:JTools"
+             Background="{DynamicResource JBackgroundBrush}">
+    <UserControl.Styles>
+        <Style Selector="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource JTextBrush}" />
+        </Style>
+        <Style Selector="TextBlock.dim">
+            <Setter Property="Foreground" Value="{DynamicResource JTextDimBrush}" />
+        </Style>
+        <Style Selector="TextBlock.fieldLabel">
+            <Setter Property="Margin" Value="0,0,0,4" />
+        </Style>
+        <Style Selector="TextBlock.warning">
+            <Setter Property="Foreground" Value="{DynamicResource JWarningTextBrush}" />
+        </Style>
+        <Style Selector="TextBox">
+            <Setter Property="Background" Value="{DynamicResource JBackgroundBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource JTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource JBorderBrush}" />
+            <Setter Property="CaretBrush" Value="{DynamicResource JTextBrush}" />
+        </Style>
+        <Style Selector="TextBox:pointerover /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="{DynamicResource JInputHoverBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource JTextDimBrush}" />
+        </Style>
+        <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="{DynamicResource JInputHoverBrush}" />
+        </Style>
+        <Style Selector="TextBox.code">
+            <Setter Property="FontFamily" Value="Consolas,Cascadia Mono,Menlo,monospace" />
+        </Style>
+        <Style Selector="ListBox">
+            <Setter Property="Background" Value="{DynamicResource JBackgroundBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource JBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+        <!-- Dark green selection so the green item text stays readable (the default fills with the bright accent). -->
+        <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource JSurfaceBrush}" />
+        </Style>
+        <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource JSelectionBrush}" />
+        </Style>
+        <Style Selector="ListBoxItem:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource JSelectionHoverBrush}" />
+        </Style>
+        <Style Selector="ListBoxItem:selected:focus /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource JSelectionBrush}" />
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,Auto,*">
+        <!-- Header: title, on/off switch, settings -->
+        <Border Grid.Row="0" BorderBrush="{DynamicResource JBorderBrush}" BorderThickness="0,0,0,1" Padding="12,6">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="12">
+                    <ToggleSwitch Name="EnabledSwitch" OnContent="Expansion on" OffContent="Expansion off"
+                                  Foreground="{DynamicResource JTextBrush}" VerticalAlignment="Center" />
+                    <Button Name="SettingsButton" Content="Settings…" Click="OnSettingsClick" VerticalAlignment="Center" />
+                </StackPanel>
+                <TextBlock Text="Text Expander" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" />
+            </DockPanel>
+        </Border>
+
+        <!-- Shown when the standalone Text Expander app already owns expansion -->
+        <Border Grid.Row="1" Name="UnavailableBanner" IsVisible="False"
+                Background="{DynamicResource JWarningBackgroundBrush}" BorderBrush="{DynamicResource JWarningBorderBrush}" BorderThickness="0,0,0,1" Padding="12,8">
+            <TextBlock Foreground="{DynamicResource JWarningTextBrush}" TextWrapping="Wrap"
+                       Text="The standalone Text Expander app is running, so it is handling expansion. Exit it from its tray icon and restart JTools to manage abbreviations here." />
+        </Border>
+
+        <Grid Grid.Row="2" Name="EditorArea" ColumnDefinitions="320,*">
+            <!-- Abbreviation list -->
+            <DockPanel Grid.Column="0" Margin="12">
+                <TextBox DockPanel.Dock="Top" Name="SearchBox" Watermark="Search…" Margin="0,0,0,8" />
+                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
+                    <Button Name="NewButton" Content="New" Click="OnNewClick" ToolTip.Tip="Ctrl+N" />
+                    <Button Name="DeleteButton" Content="Delete" Click="OnDeleteClick" IsEnabled="False" />
+                </StackPanel>
+                <ListBox Name="SnippetList" SelectionMode="Single">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="local:SnippetRow">
+                            <StackPanel Spacing="2">
+                                <TextBlock Text="{Binding Abbreviation}" FontFamily="Consolas,Cascadia Mono,Menlo,monospace" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding Preview}" Classes="dim" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+
+            <!-- Editor -->
+            <Border Grid.Column="1" BorderBrush="{DynamicResource JBorderBrush}" BorderThickness="1,0,0,0">
+                <Grid Margin="12" RowDefinitions="Auto,Auto,Auto,*,Auto,Auto">
+                    <TextBlock Grid.Row="0" Classes="fieldLabel" Text="Abbreviation" />
+                    <TextBox Grid.Row="1" Name="AbbreviationBox" Classes="code" Margin="0,0,0,12" />
+                    <TextBlock Grid.Row="2" Classes="fieldLabel" Text="Expands to" />
+                    <TextBox Grid.Row="3" Name="ExpansionBox" AcceptsReturn="True" AcceptsTab="True"
+                             TextWrapping="Wrap" VerticalContentAlignment="Top" />
+                    <TextBlock Grid.Row="4" Name="HintText" Classes="dim" TextWrapping="Wrap" Margin="0,10" />
+                    <StackPanel Grid.Row="5" Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right">
+                        <TextBlock Name="StatusText" VerticalAlignment="Center" />
+                        <Button Name="SaveButton" Content="Save" Classes="accent" Click="OnSaveClick" ToolTip.Tip="Ctrl+S" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

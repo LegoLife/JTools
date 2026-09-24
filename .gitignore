@@ -1,0 +1,11 @@
+## .NET
+bin/
+obj/
+*.user
+
+## Rider / IntelliJ
+.idea/
+
+## OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,88 @@
+<Window x:Class="JTools.MainWindow"
+        xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:jtail="clr-namespace:JTail;assembly=JTail.Core"
+        xmlns:local="clr-namespace:JTools"
+        Title="JTools"
+        Width="1000" Height="640"
+        MinWidth="640" MinHeight="400"
+        Icon="/Assets/icon.ico"
+        Background="{DynamicResource JBackgroundBrush}">
+    <Window.Styles>
+        <!-- Side bar buttons: dim until hovered; the selected tool gets a bright left accent bar. -->
+        <Style Selector="Button.nav">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource JTextDimBrush}" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="3,0,0,0" />
+            <Setter Property="CornerRadius" Value="0" />
+            <Setter Property="Padding" Value="0,12" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="Button.nav:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource JSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource JTextBrush}" />
+        </Style>
+        <Style Selector="Button.nav:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource JSurfacePressedBrush}" />
+        </Style>
+        <Style Selector="Button.nav.selected">
+            <Setter Property="Background" Value="{DynamicResource JSurfaceBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource JTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource JAccentBrush}" />
+        </Style>
+        <Style Selector="Button.nav.selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="BorderBrush" Value="{DynamicResource JAccentBrush}" />
+        </Style>
+        <Style Selector="Button.nav TextBlock.icon">
+            <Setter Property="FontFamily" Value="Segoe Fluent Icons,Segoe MDL2 Assets" />
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Button.nav TextBlock.label">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+    </Window.Styles>
+    <Grid ColumnDefinitions="72,*">
+        <Border Grid.Column="0" Background="{DynamicResource JBackgroundBrush}"
+                BorderBrush="{DynamicResource JBorderBrush}" BorderThickness="0,0,1,0">
+            <DockPanel>
+                <Button DockPanel.Dock="Bottom" Name="ThemeButton" Classes="nav" ToolTip.Tip="Dark or light theme">
+                    <Button.Flyout>
+                        <MenuFlyout Placement="RightEdgeAlignedBottom">
+                            <MenuItem Name="DarkThemeItem" Header="Dark" ToggleType="Radio" GroupName="Theme" Click="OnThemeItemClick" />
+                            <MenuItem Name="LightThemeItem" Header="Light" ToggleType="Radio" GroupName="Theme" Click="OnThemeItemClick" />
+                            <MenuItem Name="SystemThemeItem" Header="Use Windows setting" ToggleType="Radio" GroupName="Theme" Click="OnThemeItemClick" />
+                        </MenuFlyout>
+                    </Button.Flyout>
+                    <StackPanel Spacing="4">
+                        <TextBlock Classes="icon" Text="&#xE706;" />
+                        <TextBlock Classes="label" Text="Theme" />
+                    </StackPanel>
+                </Button>
+                <StackPanel>
+                    <Button Name="TailNavButton" Classes="nav" Click="OnTailNavClick" ToolTip.Tip="JTail: tail log files">
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="icon" Text="&#xE8A5;" />
+                            <TextBlock Classes="label" Text="Tail" />
+                        </StackPanel>
+                    </Button>
+                    <Button Name="ExpanderNavButton" Classes="nav" Click="OnExpanderNavClick" ToolTip.Tip="Text Expander: abbreviations">
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="icon" Text="&#xE765;" />
+                            <TextBlock Classes="label" Text="Expand" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+        <Panel Grid.Column="1">
+            <jtail:JTailView Name="TailView" />
+            <local:TextExpanderView Name="ExpanderView" IsVisible="False" />
+        </Panel>
+    </Grid>
+</Window>
