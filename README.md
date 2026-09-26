@@ -1,0 +1,57 @@
+# JTools
+
+A small Windows tray app that puts two everyday tools in one window:
+
+- **Tail**: a live log viewer. Open several log files in tabs, watch new lines as they're written, and highlight lines that contain words like `ERROR` or `WARN`.
+- **Expand**: a text expander. Type an abbreviation such as `;sig` in any app and it expands into the full text.
+
+![JTail tailing a log file with ERROR and WARN lines highlighted](docs/screenshots/tail-dark.png)
+
+## Download
+
+Get **JTools.exe** from the [latest release](https://github.com/LegoLife/JTools/releases/latest). It's a single self-contained file for 64-bit Windows 10/11, so there's nothing else to install. Just run it.
+
+Windows SmartScreen may warn you the first time because the exe isn't code-signed. Choose **More info** → **Run anyway**.
+
+## Tail
+
+- Open log files with **Open**, **Recent**, or by dragging them onto the window. Each file gets its own tab.
+- New lines appear as they're written. **Auto-scroll** follows the end of the file.
+- **Highlights** colors every line that contains a chosen word.
+- **Appearance** sets the log colors and font size. Use the theme's colors, the green-on-black **Matrix** preset, or your own.
+
+| Line highlights | Log appearance |
+| --- | --- |
+| ![Line Highlights dialog with ERROR and WARN rules](docs/screenshots/highlights.png) | ![Log Appearance dialog with colors, presets and font size](docs/screenshots/appearance.png) |
+
+## Expand
+
+- Create abbreviations that expand into any text, including multiple lines.
+- Choose whether to expand immediately or when you press Space, Tab and/or Enter (**Settings**).
+- Turn expansion on or off with the switch at the top.
+
+![Text Expander with a list of abbreviations](docs/screenshots/expand-dark.png)
+
+## Themes and tray
+
+- Dark, Light, or match your Windows setting (**Theme** at the bottom of the side bar).
+- JTools runs from the system tray. Closing the window only hides it, so text expansion keeps working. Quit from the tray menu.
+- Optionally **Start with Windows** (tray menu). It starts hidden in the tray.
+
+![JTail in the light theme](docs/screenshots/tail-light.png)
+
+## Notes
+
+- Only one app can expand text at a time. If the standalone Text Expander is running, exit it first.
+- Text can't be expanded in apps running as administrator unless JTools also runs as administrator (a Windows security rule).
+
+## Building
+
+Requires the .NET 10 SDK.
+
+```
+dotnet run --project JTools
+dotnet publish JTools/JTools.csproj -c Release -o publish
+```
+
+The publish command produces a single self-contained `publish/JTools.exe` for win-x64.
