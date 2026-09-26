@@ -104,7 +104,7 @@
     <Style Selector="Button.tool:pressed /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="Background" Value="{DynamicResource JSurfacePressedBrush}" />
     </Style>
-    <Style Selector="Button.tool StackPanel">
+    <Style Selector="Button.tool > StackPanel">
         <Setter Property="Orientation" Value="Horizontal" />
         <Setter Property="Spacing" Value="6" />
     </Style>

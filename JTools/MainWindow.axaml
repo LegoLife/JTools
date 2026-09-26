@@ -47,7 +47,7 @@
         <Style Selector="Button.nav.selected Border.indicator">
             <Setter Property="IsVisible" Value="True" />
         </Style>
-        <Style Selector="Button.nav StackPanel">
+        <Style Selector="Button.nav > StackPanel">
             <Setter Property="Spacing" Value="4" />
             <Setter Property="HorizontalAlignment" Value="Center" />
         </Style>
