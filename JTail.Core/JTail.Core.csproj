@@ -10,9 +10,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="11.2.1" />
-        <PackageReference Include="Avalonia.Controls.ColorPicker" Version="11.2.1" />
-        <PackageReference Include="Avalonia.AvaloniaEdit" Version="11.2.0" />
+        <PackageReference Include="Avalonia" Version="11.3.22" />
+        <PackageReference Include="Avalonia.Controls.ColorPicker" Version="11.3.22" />
+        <PackageReference Include="Avalonia.AvaloniaEdit" Version="11.4.1" />
     </ItemGroup>
 
 </Project>

@@ -44,7 +44,7 @@ public partial class JTailView : UserControl
 
     private void OnDrop(object? sender, DragEventArgs e)
     {
-        var files = e.Data.GetFiles();
+        var files = e.DataTransfer.TryGetFiles();
         if (files is null)
         {
             return;
