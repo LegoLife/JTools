@@ -1,0 +1,176 @@
+<!--
+    Shared control styles on top of Fluent, using the Palette.axaml colors.
+    Include with <StyleInclude Source="avares://JTail.Core/Themes/Controls.axaml" /> in App.axaml, or in a
+    control's / window's Styles when it may be hosted by an app that doesn't include it.
+    Spacing scale: 4 / 8 / 12 / 16 / 20. Corner radius: 4 (controls), 6 (cards).
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Base text colors, inherited by everything inside -->
+    <Style Selector="Window, UserControl">
+        <Setter Property="Foreground" Value="{DynamicResource JTextBrush}" />
+    </Style>
+    <Style Selector="Window">
+        <Setter Property="Background" Value="{DynamicResource JBackgroundBrush}" />
+    </Style>
+
+    <!-- Text roles -->
+    <Style Selector="TextBlock.title">
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="TextBlock.sectionHeader">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="TextBlock.fieldLabel">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="{DynamicResource JTextDimBrush}" />
+        <Setter Property="Margin" Value="0,0,0,6" />
+    </Style>
+    <Style Selector="TextBlock.dim">
+        <Setter Property="Foreground" Value="{DynamicResource JTextDimBrush}" />
+    </Style>
+    <Style Selector="TextBlock.caption">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="{DynamicResource JTextDimBrush}" />
+    </Style>
+    <Style Selector="TextBlock.warning">
+        <Setter Property="Foreground" Value="{DynamicResource JWarningTextBrush}" />
+    </Style>
+    <Style Selector="TextBlock.icon">
+        <Setter Property="FontFamily" Value="{DynamicResource JIconFont}" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- Layout surfaces -->
+    <Style Selector="Border.toolbar">
+        <Setter Property="Background" Value="{DynamicResource JChromeBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource JBorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Setter Property="Padding" Value="8,6" />
+    </Style>
+    <Style Selector="Border.statusBar">
+        <Setter Property="Background" Value="{DynamicResource JChromeBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource JBorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,1,0,0" />
+        <Setter Property="Padding" Value="12,3" />
+        <Setter Property="MinHeight" Value="28" />
+    </Style>
+    <Style Selector="Border.card">
+        <Setter Property="Background" Value="{DynamicResource JCardBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource JBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Padding" Value="16" />
+    </Style>
+    <!-- Dialog button row, docked at the bottom of a dialog -->
+    <Style Selector="Border.dialogFooter">
+        <Setter Property="Background" Value="{DynamicResource JChromeBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource JBorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,1,0,0" />
+        <Setter Property="Padding" Value="20,12" />
+    </Style>
+    <Style Selector="Border.dialogFooter StackPanel.buttons">
+        <Setter Property="Orientation" Value="Horizontal" />
+        <Setter Property="Spacing" Value="8" />
+        <Setter Property="HorizontalAlignment" Value="Right" />
+    </Style>
+    <Style Selector="Border.dialogFooter Button">
+        <Setter Property="MinWidth" Value="80" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Border.banner">
+        <Setter Property="Background" Value="{DynamicResource JWarningBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource JWarningBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="Padding" Value="12,8" />
+    </Style>
+
+    <!-- Flat toolbar buttons: transparent until hovered; content is usually an icon + label -->
+    <Style Selector="Button.tool">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="8,5" />
+        <Setter Property="Foreground" Value="{DynamicResource JTextBrush}" />
+    </Style>
+    <Style Selector="Button.tool:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource JSurfaceBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource JTextBrush}" />
+    </Style>
+    <Style Selector="Button.tool:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource JSurfacePressedBrush}" />
+    </Style>
+    <Style Selector="Button.tool StackPanel">
+        <Setter Property="Orientation" Value="Horizontal" />
+        <Setter Property="Spacing" Value="6" />
+    </Style>
+    <Style Selector="Separator.toolbarSeparator">
+        <Setter Property="Width" Value="1" />
+        <Setter Property="Height" Value="18" />
+        <Setter Property="Margin" Value="6,0" />
+        <Setter Property="Background" Value="{DynamicResource JBorderBrush}" />
+    </Style>
+
+    <!-- Buttons with an icon glyph beside the label -->
+    <Style Selector="Button StackPanel.iconLabel">
+        <Setter Property="Orientation" Value="Horizontal" />
+        <Setter Property="Spacing" Value="6" />
+    </Style>
+    <Style Selector="Button StackPanel.iconLabel TextBlock.icon">
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <!-- Inputs -->
+    <Style Selector="TextBox">
+        <Setter Property="Background" Value="{DynamicResource JInputBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource JBorderBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource JTextBrush}" />
+        <Setter Property="CaretBrush" Value="{DynamicResource JTextBrush}" />
+    </Style>
+    <Style Selector="TextBox:pointerover /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="{DynamicResource JInputHoverBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource JTextDimBrush}" />
+    </Style>
+    <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="{DynamicResource JInputBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource JAccentBrush}" />
+    </Style>
+    <Style Selector="TextBox:pointerover, TextBox:focus">
+        <Setter Property="Foreground" Value="{DynamicResource JTextBrush}" />
+    </Style>
+    <Style Selector="TextBox.code">
+        <Setter Property="FontFamily" Value="{DynamicResource JMonoFont}" />
+    </Style>
+
+    <!-- Lists: flat, with a soft green selection so text stays readable -->
+    <Style Selector="ListBox">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style Selector="ListBoxItem">
+        <Setter Property="Padding" Value="12,8" />
+        <Setter Property="Margin" Value="0,1" />
+        <Setter Property="CornerRadius" Value="4" />
+    </Style>
+    <Style Selector="ListBoxItem /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="CornerRadius" Value="4" />
+    </Style>
+    <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource JSurfaceBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource JTextBrush}" />
+    </Style>
+    <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource JSelectionBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource JTextBrush}" />
+    </Style>
+    <Style Selector="ListBoxItem:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource JSelectionHoverBrush}" />
+    </Style>
+    <Style Selector="ListBoxItem:selected:focus /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource JSelectionBrush}" />
+    </Style>
+</Styles>

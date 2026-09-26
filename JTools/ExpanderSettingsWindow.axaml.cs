@@ -43,7 +43,7 @@ public partial class ExpanderSettingsWindow : Window
         if (triggerMode && !space && !tab && !enter)
         {
             ErrorText.Text = "Choose at least one trigger key.";
-            ErrorText.IsVisible = true;
+            ErrorBanner.IsVisible = true;
             return;
         }
 

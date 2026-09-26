@@ -2,49 +2,56 @@
         xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Text Expansion Settings"
-        Width="480"
+        Width="500"
         SizeToContent="Height"
         CanResize="False"
         ShowInTaskbar="False"
-        Background="{DynamicResource JBackgroundBrush}"
         WindowStartupLocation="CenterOwner">
     <Window.Styles>
-        <Style Selector="TextBlock">
-            <Setter Property="Foreground" Value="{DynamicResource JTextBrush}" />
-        </Style>
-        <Style Selector="RadioButton">
-            <Setter Property="Foreground" Value="{DynamicResource JTextBrush}" />
-        </Style>
-        <Style Selector="CheckBox">
-            <Setter Property="Foreground" Value="{DynamicResource JTextBrush}" />
-        </Style>
         <Style Selector="TextBlock.note">
             <Setter Property="Foreground" Value="{DynamicResource JTextDimBrush}" />
+            <Setter Property="FontSize" Value="12" />
             <Setter Property="TextWrapping" Value="Wrap" />
             <Setter Property="Margin" Value="28,0,0,0" />
         </Style>
     </Window.Styles>
-    <StackPanel Margin="16" Spacing="6">
-        <RadioButton Name="ImmediateRadio" GroupName="Mode" Content="Expand immediately after the abbreviation is typed" />
-        <TextBlock Classes="note"
-                   Text="Tip: start abbreviations with a symbol like ; (e.g. ;sig) so they don't fire while you're typing ordinary words. If one abbreviation is the start of another (e.g. ;ad and ;addr), the shorter one always wins." />
-
-        <RadioButton Name="TriggerRadio" GroupName="Mode" Margin="0,10,0,0"
-                     Content="Expand when a trigger key is pressed after the abbreviation" />
-        <StackPanel Name="TriggerOptions" Margin="28,0,0,0" Spacing="4">
-            <StackPanel Orientation="Horizontal" Spacing="16">
-                <CheckBox Name="SpaceCheckBox" Content="Space" />
-                <CheckBox Name="TabCheckBox" Content="Tab" />
-                <CheckBox Name="EnterCheckBox" Content="Enter" />
+    <DockPanel>
+        <Border DockPanel.Dock="Bottom" Classes="dialogFooter">
+            <StackPanel Classes="buttons">
+                <Button Content="Save" Classes="accent" IsDefault="True" Click="OnSaveClick" />
+                <Button Content="Cancel" IsCancel="True" Click="OnCancelClick" />
             </StackPanel>
-            <CheckBox Name="KeepTriggerCheckBox" Content="Also type the trigger key after the expansion (e.g. keep the space)" />
-        </StackPanel>
+        </Border>
 
-        <TextBlock Name="ErrorText" Foreground="{DynamicResource JWarningTextBrush}" IsVisible="False" Margin="0,8,0,0" />
+        <StackPanel Margin="20" Spacing="12">
+            <TextBlock Classes="sectionHeader" Text="When should abbreviations expand?" />
 
-        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,12,0,0">
-            <Button Content="Save" Classes="accent" IsDefault="True" Click="OnSaveClick" />
-            <Button Content="Cancel" IsCancel="True" Click="OnCancelClick" />
+            <Border Classes="card" Padding="14,10">
+                <StackPanel Spacing="4">
+                    <RadioButton Name="ImmediateRadio" GroupName="Mode" Content="Immediately after the abbreviation is typed" />
+                    <TextBlock Classes="note"
+                               Text="Tip: start abbreviations with a symbol like ; (e.g. ;sig) so they don't fire while you're typing ordinary words. If one abbreviation is the start of another (e.g. ;ad and ;addr), the shorter one always wins." />
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card" Padding="14,10">
+                <StackPanel Spacing="8">
+                    <RadioButton Name="TriggerRadio" GroupName="Mode"
+                                 Content="When a trigger key is pressed after the abbreviation" />
+                    <StackPanel Name="TriggerOptions" Margin="28,0,0,4" Spacing="6">
+                        <StackPanel Orientation="Horizontal" Spacing="20">
+                            <CheckBox Name="SpaceCheckBox" Content="Space" />
+                            <CheckBox Name="TabCheckBox" Content="Tab" />
+                            <CheckBox Name="EnterCheckBox" Content="Enter" />
+                        </StackPanel>
+                        <CheckBox Name="KeepTriggerCheckBox" Content="Also type the trigger key after the expansion (e.g. keep the space)" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Name="ErrorBanner" Classes="banner" IsVisible="False">
+                <TextBlock Name="ErrorText" Classes="warning" TextWrapping="Wrap" />
+            </Border>
         </StackPanel>
-    </StackPanel>
+    </DockPanel>
 </Window>

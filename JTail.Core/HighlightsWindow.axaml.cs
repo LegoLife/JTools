@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
@@ -26,6 +27,7 @@ public partial class HighlightsWindow : Window
     private void RebuildRulesList()
     {
         RulesList.Children.Clear();
+        NoRulesText.IsVisible = _rulesStore!.Rules.Count == 0;
 
         for (var i = 0; i < _rulesStore!.Rules.Count; i++)
         {
@@ -43,7 +45,7 @@ public partial class HighlightsWindow : Window
             {
                 Text = rule.Word,
                 VerticalAlignment = VerticalAlignment.Center,
-                Width = 150
+                Margin = new Thickness(8, 0)
             };
             wordBox.LostFocus += (_, _) =>
             {
@@ -58,7 +60,8 @@ public partial class HighlightsWindow : Window
                 _onRulesChanged!();
             };
 
-            var removeButton = new Button { Content = "Remove" };
+            var removeButton = new Button { Content = "", Classes = { "remove" } }; // Delete glyph
+            ToolTip.SetTip(removeButton, "Remove rule");
             removeButton.Click += (_, _) =>
             {
                 _rulesStore.RemoveAt(index);
@@ -66,7 +69,9 @@ public partial class HighlightsWindow : Window
                 _onRulesChanged!();
             };
 
-            var row = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
+            var row = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,*,Auto") };
+            Grid.SetColumn(wordBox, 1);
+            Grid.SetColumn(removeButton, 2);
             row.Children.Add(colorPicker);
             row.Children.Add(wordBox);
             row.Children.Add(removeButton);

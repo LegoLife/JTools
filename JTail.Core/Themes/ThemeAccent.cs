@@ -11,8 +11,8 @@ namespace JTail;
 /// </summary>
 public static class ThemeAccent
 {
-    private static readonly Color DarkAccent = Color.Parse("#00FF41");
-    private static readonly Color LightAccent = Color.Parse("#0B8A33");
+    private static readonly Color DarkAccent = Color.Parse("#238636");
+    private static readonly Color LightAccent = Color.Parse("#1A7F37");
 
     public static void KeepInSync(Application app)
     {

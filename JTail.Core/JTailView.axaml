@@ -4,77 +4,159 @@
              Background="{DynamicResource JBackgroundBrush}"
              DragDrop.AllowDrop="True">
     <UserControl.Styles>
-        <Style Selector="Menu">
-            <Setter Property="Background" Value="{DynamicResource JBackgroundBrush}" />
-            <Setter Property="Foreground" Value="{DynamicResource JTextBrush}" />
-        </Style>
-        <Style Selector="MenuItem">
-            <Setter Property="Foreground" Value="{DynamicResource JTextBrush}" />
-        </Style>
-        <Style Selector="Separator">
-            <Setter Property="Background" Value="{DynamicResource JBorderBrush}" />
-        </Style>
+        <StyleInclude Source="avares://JTail.Core/Themes/Controls.axaml" />
 
         <!-- File tab headers (built in LogTabItem) -->
         <Style Selector="Border.logTab">
-            <Setter Property="Padding" Value="10,6" />
-            <Setter Property="Background" Value="{DynamicResource JBackgroundBrush}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource JBorderBrush}" />
+            <Setter Property="Padding" Value="12,0,6,0" />
+            <Setter Property="Height" Value="34" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0,0,0,2" />
         </Style>
-        <Style Selector="Border.logTab.selected">
+        <Style Selector="Border.logTab:pointerover">
             <Setter Property="Background" Value="{DynamicResource JSurfaceBrush}" />
+        </Style>
+        <Style Selector="Border.logTab.selected">
+            <Setter Property="Background" Value="{DynamicResource JBackgroundBrush}" />
             <Setter Property="BorderBrush" Value="{DynamicResource JAccentBrush}" />
         </Style>
         <Style Selector="TextBlock.logTabTitle">
+            <Setter Property="Foreground" Value="{DynamicResource JTextDimBrush}" />
+        </Style>
+        <Style Selector="Border.logTab:pointerover TextBlock.logTabTitle, Border.logTab.selected TextBlock.logTabTitle">
             <Setter Property="Foreground" Value="{DynamicResource JTextBrush}" />
-            <Setter Property="FontFamily" Value="Consolas,Cascadia Mono,Menlo,monospace" />
         </Style>
         <Style Selector="Button.logTabClose">
             <Setter Property="Foreground" Value="{DynamicResource JTextDimBrush}" />
             <Setter Property="Background" Value="Transparent" />
+            <Setter Property="FontFamily" Value="{DynamicResource JIconFont}" />
+            <Setter Property="FontSize" Value="9" />
+            <Setter Property="Width" Value="22" />
+            <Setter Property="Height" Value="22" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Button.logTabClose:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource JSurfacePressedBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource JTextBrush}" />
+        </Style>
+
+        <!-- Empty state: a dashed drop zone that highlights on hover -->
+        <Style Selector="Panel#EmptyState Rectangle#DropZoneOutline">
+            <Setter Property="Stroke" Value="{DynamicResource JBorderBrush}" />
+        </Style>
+        <Style Selector="Panel#EmptyState:pointerover Rectangle#DropZoneOutline">
+            <Setter Property="Stroke" Value="{DynamicResource JAccentBrush}" />
+        </Style>
+
+        <Style Selector="Border.statusBar TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Border.statusBar CheckBox">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="MinHeight" Value="24" />
         </Style>
     </UserControl.Styles>
+
     <Grid RowDefinitions="Auto,*,Auto">
-        <Menu Grid.Row="0" Name="MainMenu">
-            <MenuItem Header="_File">
-                <MenuItem Header="_Open..." Name="OpenMenuItem" HotKey="Ctrl+O" InputGesture="Ctrl+O" Click="OnOpenClick" />
-                <MenuItem Header="_Recent Files" Name="RecentFilesMenuItem">
-                    <MenuItem Header="(no recent files)" IsEnabled="False" />
-                </MenuItem>
-                <Separator />
-                <MenuItem Header="E_xit" Name="ExitMenuItem" Click="OnExitClick" />
-            </MenuItem>
-            <MenuItem Header="_View">
-                <MenuItem Header="_Colors..." Name="ColorsMenuItem" Click="OnColorsClick" />
-                <MenuItem Header="_Font..." Name="FontMenuItem" Click="OnFontClick" />
-                <MenuItem Header="_Highlights..." Name="HighlightsMenuItem" Click="OnHighlightsClick" />
-            </MenuItem>
-        </Menu>
+        <!-- Toolbar -->
+        <Border Grid.Row="0" Classes="toolbar">
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Classes="tool" ToolTip.Tip="More">
+                    <Button.Flyout>
+                        <MenuFlyout Placement="BottomEdgeAlignedRight">
+                            <MenuItem Header="Exit" Name="ExitMenuItem" Click="OnExitClick" />
+                        </MenuFlyout>
+                    </Button.Flyout>
+                    <TextBlock Classes="icon" Text="&#xE712;" />
+                </Button>
+                <StackPanel Orientation="Horizontal" Spacing="2">
+                    <Button Name="OpenButton" Classes="tool" HotKey="Ctrl+O" Click="OnOpenClick" ToolTip.Tip="Open a log file (Ctrl+O)">
+                        <StackPanel>
+                            <TextBlock Classes="icon" Text="&#xE8E5;" />
+                            <TextBlock Text="Open" />
+                        </StackPanel>
+                    </Button>
+                    <Button Name="RecentButton" Classes="tool" ToolTip.Tip="Recently opened files">
+                        <Button.Flyout>
+                            <MenuFlyout Placement="BottomEdgeAlignedLeft" />
+                        </Button.Flyout>
+                        <StackPanel>
+                            <TextBlock Classes="icon" Text="&#xE81C;" />
+                            <TextBlock Text="Recent" />
+                            <TextBlock Classes="icon" Text="&#xE70D;" FontSize="9" />
+                        </StackPanel>
+                    </Button>
+                    <Separator Classes="toolbarSeparator" />
+                    <Button Name="HighlightsButton" Classes="tool" Click="OnHighlightsClick" ToolTip.Tip="Highlight lines containing chosen words">
+                        <StackPanel>
+                            <TextBlock Classes="icon" Text="&#xE7E6;" />
+                            <TextBlock Text="Highlights" />
+                        </StackPanel>
+                    </Button>
+                    <Button Name="AppearanceButton" Classes="tool" Click="OnAppearanceClick" ToolTip.Tip="Log colors and font size">
+                        <StackPanel>
+                            <TextBlock Classes="icon" Text="&#xE790;" />
+                            <TextBlock Text="Appearance" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
         <Grid Grid.Row="1">
             <DockPanel Name="TabsPanel" LastChildFill="True" IsVisible="False">
-                <Border DockPanel.Dock="Top" Background="{DynamicResource JBackgroundBrush}"
+                <Border DockPanel.Dock="Top" Background="{DynamicResource JChromeBrush}"
                         BorderBrush="{DynamicResource JBorderBrush}" BorderThickness="0,0,0,1">
-                    <StackPanel Name="TabStrip" Orientation="Horizontal" />
+                    <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Disabled">
+                        <StackPanel Name="TabStrip" Orientation="Horizontal" />
+                    </ScrollViewer>
                 </Border>
-                <Panel Name="TabContentHost" Background="{DynamicResource JBackgroundBrush}" />
+                <Panel Name="TabContentHost" Background="{DynamicResource JLogBackgroundBrush}" />
             </DockPanel>
-            <TextBlock Name="EmptyStateText"
-                       Text="Drag a log file here, or File → Open... (Ctrl+O)"
-                       Foreground="{DynamicResource JTextDimBrush}"
-                       FontFamily="Consolas,Cascadia Mono,Menlo,monospace"
-                       FontSize="14"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       Cursor="Hand"
-                       PointerPressed="OnEmptyStateClick" />
+
+            <!-- Shown when no file is open; clicking anywhere in it opens the file picker -->
+            <Panel Name="EmptyState" Width="440" Height="240"
+                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                   Background="Transparent" Cursor="Hand"
+                   PointerPressed="OnEmptyStateClick">
+                <Rectangle Name="DropZoneOutline" StrokeThickness="1.5" StrokeDashArray="4,3"
+                           RadiusX="8" RadiusY="8" Fill="{DynamicResource JCardBrush}" />
+                <StackPanel Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Classes="icon" Text="&#xE8A5;" FontSize="36"
+                               Foreground="{DynamicResource JAccentBrush}" HorizontalAlignment="Center" />
+                    <TextBlock Classes="sectionHeader" Text="Drop a log file here to start tailing"
+                               FontSize="15" HorizontalAlignment="Center" Margin="0,4,0,0" />
+                    <TextBlock Classes="caption" Text="New lines appear as they're written"
+                               HorizontalAlignment="Center" />
+                    <Button Classes="accent" HorizontalAlignment="Center" Margin="0,8,0,0" Click="OnOpenClick">
+                        <StackPanel Classes="iconLabel">
+                            <TextBlock Classes="icon" Text="&#xE8E5;" />
+                            <TextBlock Text="Open file…" />
+                            <TextBlock Text="Ctrl+O" Opacity="0.7" Margin="4,0,0,0" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Panel>
         </Grid>
-        <Border Grid.Row="2" Background="{DynamicResource JBackgroundBrush}"
-                BorderBrush="{DynamicResource JBorderBrush}" BorderThickness="0,1,0,0" Padding="8,4">
-            <CheckBox Name="AutoScrollCheckBox"
-                      Content="Auto-scroll"
-                      Foreground="{DynamicResource JTextBrush}"
-                      IsChecked="True" />
+
+        <!-- Status bar -->
+        <Border Grid.Row="2" Classes="statusBar">
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                <StackPanel Grid.Column="0" Name="TailingIndicator" Orientation="Horizontal" Spacing="6"
+                            Margin="0,0,12,0" IsVisible="False">
+                    <Ellipse Width="7" Height="7" Fill="{DynamicResource JAccentBrush}" VerticalAlignment="Center" />
+                    <TextBlock Text="Tailing" />
+                </StackPanel>
+                <TextBlock Grid.Column="1" Name="FilePathText" Classes="dim" Text="No file open"
+                           TextTrimming="PrefixCharacterEllipsis" />
+                <TextBlock Grid.Column="2" Name="FileStatsText" Classes="dim" Margin="20,0" IsVisible="False" />
+                <CheckBox Grid.Column="3" Name="AutoScrollCheckBox" Content="Auto-scroll" IsChecked="True"
+                          ToolTip.Tip="Follow new lines as they're written (keeps the last 100 lines)" />
+            </Grid>
         </Border>
     </Grid>
 </UserControl>

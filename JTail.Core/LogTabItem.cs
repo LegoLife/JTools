@@ -52,9 +52,9 @@ public sealed class LogTabItem
             WordWrap = false,
             HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-            FontFamily = new FontFamily("Consolas,Cascadia Mono,Menlo,monospace"),
+            FontFamily = new FontFamily("Cascadia Mono,Consolas,Menlo,monospace"),
             FontSize = fontSize,
-            Padding = new Thickness(8),
+            Padding = new Thickness(12, 8),
             Document = new TextDocument(initialText),
             IsVisible = false
         };
@@ -64,15 +64,14 @@ public sealed class LogTabItem
         // Header colors come from the "logTab" styles in JTailView.axaml, so they follow the app theme.
         var closeButton = new Button
         {
-            Content = "×",
-            Padding = new Thickness(4, 0),
+            Content = "", // Cancel glyph; the logTabClose style sets the icon font
             BorderThickness = new Thickness(0),
             VerticalAlignment = VerticalAlignment.Center,
             Classes = { "logTabClose" }
         };
         closeButton.Click += (_, _) => CloseRequested?.Invoke(this, EventArgs.Empty);
 
-        var headerPanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 4 };
+        var headerPanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 6 };
         headerPanel.Children.Add(new TextBlock
         {
             Text = Path.GetFileName(path),
@@ -139,7 +138,10 @@ public sealed class LogTabItem
 
     public void AppendText(string text) => Editor.Document.Insert(Editor.Document.TextLength, text);
 
-    public void RefreshFileSize() => ToolTip.SetTip(_headerBorder, $"{FilePath} ({FormatFileSize(Tailer.Length)})");
+    /// <summary>The file's current size, e.g. "12.4 KB".</summary>
+    public string FileSizeText => FormatFileSize(Tailer.Length);
+
+    public void RefreshFileSize() => ToolTip.SetTip(_headerBorder, $"{FilePath} ({FileSizeText})");
 
     private static string FormatFileSize(long bytes)
     {

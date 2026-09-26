@@ -5,7 +5,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <!-- Matrix theme colors (dark and light variants, shared with JTail), including the app-wide accent -->
+                <!-- Theme colors (dark and light variants, shared with JTail), including the app-wide accent -->
                 <ResourceInclude Source="avares://JTail.Core/Themes/Palette.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
@@ -14,5 +14,7 @@
         <FluentTheme />
         <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
         <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
+        <!-- Shared control styles (toolbars, cards, inputs, lists) on top of Fluent -->
+        <StyleInclude Source="avares://JTail.Core/Themes/Controls.axaml" />
     </Application.Styles>
 </Application>

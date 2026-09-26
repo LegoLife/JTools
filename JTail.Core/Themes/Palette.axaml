@@ -1,61 +1,74 @@
 <!--
-    Colors for every screen, in a dark ("Matrix" green-on-black) and a light variant.
+    Colors for every screen, in a dark and a light variant: neutral surfaces with a green accent.
     Include in App.axaml; the app's RequestedThemeVariant picks which set is used.
     Reference with {DynamicResource ...} so colors update when the theme switches.
+
+    Layers, back to front: Chrome (side bar, toolbars, status bar) → Background (content) → Card (raised panels).
+    Surface / SurfacePressed are hover and pressed fills on top of any layer.
 -->
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Dark">
-            <SolidColorBrush x:Key="JBackgroundBrush" Color="#000000" />
-            <SolidColorBrush x:Key="JSurfaceBrush" Color="#001A00" />
-            <SolidColorBrush x:Key="JSurfacePressedBrush" Color="#002600" />
-            <SolidColorBrush x:Key="JBorderBrush" Color="#0C4B1E" />
-            <SolidColorBrush x:Key="JTextBrush" Color="#33FF66" />
-            <SolidColorBrush x:Key="JTextDimBrush" Color="#1D6E32" />
-            <SolidColorBrush x:Key="JAccentBrush" Color="#33FF66" />
-            <SolidColorBrush x:Key="JSelectionBrush" Color="#003311" />
-            <SolidColorBrush x:Key="JSelectionHoverBrush" Color="#004416" />
-            <SolidColorBrush x:Key="JInputBackgroundBrush" Color="#000000" />
-            <SolidColorBrush x:Key="JInputHoverBrush" Color="#000A00" />
-            <SolidColorBrush x:Key="JWarningBackgroundBrush" Color="#1A1400" />
-            <SolidColorBrush x:Key="JWarningBorderBrush" Color="#665200" />
-            <SolidColorBrush x:Key="JWarningTextBrush" Color="#FFCC00" />
-            <Color x:Key="JLogBackgroundColor">#000000</Color>
-            <Color x:Key="JLogTextColor">#33FF66</Color>
-            <SolidColorBrush x:Key="JLogBackgroundBrush" Color="#000000" />
-            <SolidColorBrush x:Key="JLogTextBrush" Color="#33FF66" />
+            <SolidColorBrush x:Key="JChromeBrush" Color="#18191C" />
+            <SolidColorBrush x:Key="JBackgroundBrush" Color="#1E1F23" />
+            <SolidColorBrush x:Key="JCardBrush" Color="#26282D" />
+            <SolidColorBrush x:Key="JSurfaceBrush" Color="#2C2E33" />
+            <SolidColorBrush x:Key="JSurfacePressedBrush" Color="#35383E" />
+            <SolidColorBrush x:Key="JBorderBrush" Color="#34373D" />
+            <SolidColorBrush x:Key="JTextBrush" Color="#E6E7E9" />
+            <SolidColorBrush x:Key="JTextDimBrush" Color="#9A9EA6" />
+            <SolidColorBrush x:Key="JAccentBrush" Color="#3FB950" />
+            <SolidColorBrush x:Key="JAccentSoftBrush" Color="#1F3526" />
+            <SolidColorBrush x:Key="JSelectionBrush" Color="#233A2A" />
+            <SolidColorBrush x:Key="JSelectionHoverBrush" Color="#2A4532" />
+            <SolidColorBrush x:Key="JInputBackgroundBrush" Color="#18191C" />
+            <SolidColorBrush x:Key="JInputHoverBrush" Color="#1C1D21" />
+            <SolidColorBrush x:Key="JWarningBackgroundBrush" Color="#2D2715" />
+            <SolidColorBrush x:Key="JWarningBorderBrush" Color="#5E4E1B" />
+            <SolidColorBrush x:Key="JWarningTextBrush" Color="#E3B341" />
+            <Color x:Key="JLogBackgroundColor">#141518</Color>
+            <Color x:Key="JLogTextColor">#D4D6DA</Color>
+            <SolidColorBrush x:Key="JLogBackgroundBrush" Color="#141518" />
+            <SolidColorBrush x:Key="JLogTextBrush" Color="#D4D6DA" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="Light">
-            <SolidColorBrush x:Key="JBackgroundBrush" Color="#FFFFFF" />
-            <SolidColorBrush x:Key="JSurfaceBrush" Color="#EAF6EE" />
-            <SolidColorBrush x:Key="JSurfacePressedBrush" Color="#D8EEDF" />
-            <SolidColorBrush x:Key="JBorderBrush" Color="#B5D8C0" />
-            <SolidColorBrush x:Key="JTextBrush" Color="#0B6B2A" />
-            <SolidColorBrush x:Key="JTextDimBrush" Color="#5B7F66" />
-            <SolidColorBrush x:Key="JAccentBrush" Color="#0B8A33" />
-            <SolidColorBrush x:Key="JSelectionBrush" Color="#D3EEDB" />
-            <SolidColorBrush x:Key="JSelectionHoverBrush" Color="#C3E6CD" />
+            <SolidColorBrush x:Key="JChromeBrush" Color="#F0F1F3" />
+            <SolidColorBrush x:Key="JBackgroundBrush" Color="#F8F9FA" />
+            <SolidColorBrush x:Key="JCardBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="JSurfaceBrush" Color="#E6E8EB" />
+            <SolidColorBrush x:Key="JSurfacePressedBrush" Color="#DADDE1" />
+            <SolidColorBrush x:Key="JBorderBrush" Color="#D7DADF" />
+            <SolidColorBrush x:Key="JTextBrush" Color="#1F2328" />
+            <SolidColorBrush x:Key="JTextDimBrush" Color="#5F6670" />
+            <SolidColorBrush x:Key="JAccentBrush" Color="#1A7F37" />
+            <SolidColorBrush x:Key="JAccentSoftBrush" Color="#DCF2E3" />
+            <SolidColorBrush x:Key="JSelectionBrush" Color="#DCF2E3" />
+            <SolidColorBrush x:Key="JSelectionHoverBrush" Color="#CBEBD5" />
             <SolidColorBrush x:Key="JInputBackgroundBrush" Color="#FFFFFF" />
-            <SolidColorBrush x:Key="JInputHoverBrush" Color="#F3FAF5" />
-            <SolidColorBrush x:Key="JWarningBackgroundBrush" Color="#FFF7DB" />
+            <SolidColorBrush x:Key="JInputHoverBrush" Color="#FBFBFC" />
+            <SolidColorBrush x:Key="JWarningBackgroundBrush" Color="#FFF8E1" />
             <SolidColorBrush x:Key="JWarningBorderBrush" Color="#E6C65C" />
             <SolidColorBrush x:Key="JWarningTextBrush" Color="#7A5A00" />
             <Color x:Key="JLogBackgroundColor">#FFFFFF</Color>
-            <Color x:Key="JLogTextColor">#14532D</Color>
+            <Color x:Key="JLogTextColor">#1F2328</Color>
             <SolidColorBrush x:Key="JLogBackgroundBrush" Color="#FFFFFF" />
-            <SolidColorBrush x:Key="JLogTextBrush" Color="#14532D" />
+            <SolidColorBrush x:Key="JLogTextBrush" Color="#1F2328" />
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 
     <!-- Accent used by Fluent controls (checkboxes, toggles, focus rings, accent buttons). Fluent ignores
-         an accent defined per theme above, so ThemeAccent swaps the base color at runtime instead:
-         neon green on black, a deeper green that's readable on white. -->
-    <Color x:Key="SystemAccentColor">#00FF41</Color>
-    <Color x:Key="SystemAccentColorDark1">#0B9E3A</Color>
-    <Color x:Key="SystemAccentColorDark2">#0B8A33</Color>
-    <Color x:Key="SystemAccentColorDark3">#086B27</Color>
-    <Color x:Key="SystemAccentColorLight1">#33FF66</Color>
-    <Color x:Key="SystemAccentColorLight2">#66FF8C</Color>
-    <Color x:Key="SystemAccentColorLight3">#99FFB3</Color>
+         an accent defined per theme above, so ThemeAccent swaps the base color at runtime instead.
+         Filled accent controls carry white text, so the base is a deeper green than JAccentBrush. -->
+    <Color x:Key="SystemAccentColor">#238636</Color>
+    <Color x:Key="SystemAccentColorDark1">#1A7F37</Color>
+    <Color x:Key="SystemAccentColorDark2">#116329</Color>
+    <Color x:Key="SystemAccentColorDark3">#044F1E</Color>
+    <Color x:Key="SystemAccentColorLight1">#2EA043</Color>
+    <Color x:Key="SystemAccentColorLight2">#3FB950</Color>
+    <Color x:Key="SystemAccentColorLight3">#56D364</Color>
+
+    <!-- Log pane default fonts, shared by JTailView and the Log Appearance preview. -->
+    <FontFamily x:Key="JMonoFont">Cascadia Mono,Consolas,Menlo,monospace</FontFamily>
+    <FontFamily x:Key="JIconFont">Segoe Fluent Icons,Segoe MDL2 Assets</FontFamily>
 </ResourceDictionary>

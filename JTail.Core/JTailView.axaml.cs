@@ -8,7 +8,7 @@ using Avalonia.Threading;
 namespace JTail;
 
 /// <summary>
-/// JTail's complete UI (menu, file tabs, log views, auto-scroll) as a control, so it can be hosted
+/// JTail's complete UI (toolbar, file tabs, log views, status bar) as a control, so it can be hosted
 /// by JTail's own window or embedded in another app.
 /// </summary>
 public partial class JTailView : UserControl
@@ -31,7 +31,7 @@ public partial class JTailView : UserControl
     /// <summary>Raised when <see cref="Title"/> changes, so the hosting window can update its title.</summary>
     public event EventHandler? TitleChanged;
 
-    /// <summary>Raised when the user chooses File → Exit; the host decides what exiting means.</summary>
+    /// <summary>Raised when the user chooses Exit from the toolbar's "More" menu; the host decides what exiting means.</summary>
     public event EventHandler? ExitRequested;
 
     public JTailView()
@@ -78,9 +78,9 @@ public partial class JTailView : UserControl
         }
     }
 
-    private void OnColorsClick(object? sender, RoutedEventArgs e)
+    private void OnAppearanceClick(object? sender, RoutedEventArgs e)
     {
-        ShowDialog(new ColorSettingsWindow(_logTheme, ApplyLogTheme));
+        ShowDialog(new LogAppearanceWindow(_logTheme, ApplyLogTheme, ApplyLogFontSize));
     }
 
     private void ApplyLogTheme()
@@ -89,11 +89,6 @@ public partial class JTailView : UserControl
         {
             tab.ApplyTheme(_logTheme.Background, _logTheme.Text);
         }
-    }
-
-    private void OnFontClick(object? sender, RoutedEventArgs e)
-    {
-        ShowDialog(new FontSettingsWindow(_logTheme, ApplyLogFontSize));
     }
 
     private void ApplyLogFontSize(double fontSize)
@@ -186,7 +181,7 @@ public partial class JTailView : UserControl
         TabContentHost.Children.Add(tab.Content);
 
         TabsPanel.IsVisible = true;
-        EmptyStateText.IsVisible = false;
+        EmptyState.IsVisible = false;
 
         SelectTab(tab);
         Dispatcher.UIThread.Post(tab.ScrollToEnd, DispatcherPriority.Loaded);
@@ -207,6 +202,7 @@ public partial class JTailView : UserControl
         }
 
         UpdateTitle();
+        UpdateStatusBar();
     }
 
     private void CloseTab(LogTabItem tab)
@@ -222,8 +218,9 @@ public partial class JTailView : UserControl
             _pollTimer = null;
             _selectedTab = null;
             TabsPanel.IsVisible = false;
-            EmptyStateText.IsVisible = true;
+            EmptyState.IsVisible = true;
             SetTitle(DefaultTitle);
+            UpdateStatusBar();
             return;
         }
 
@@ -235,11 +232,12 @@ public partial class JTailView : UserControl
 
     private void RebuildRecentFilesMenu()
     {
-        RecentFilesMenuItem.Items.Clear();
+        var menu = (MenuFlyout)RecentButton.Flyout!;
+        menu.Items.Clear();
 
         if (_recentFiles.Paths.Count == 0)
         {
-            RecentFilesMenuItem.Items.Add(new MenuItem { Header = "(no recent files)", IsEnabled = false });
+            menu.Items.Add(new MenuItem { Header = "(no recent files)", IsEnabled = false });
             return;
         }
 
@@ -247,7 +245,7 @@ public partial class JTailView : UserControl
         {
             var item = new MenuItem { Header = path };
             item.Click += (_, _) => OnRecentFileClick(path);
-            RecentFilesMenuItem.Items.Add(item);
+            menu.Items.Add(item);
         }
     }
 
@@ -288,7 +286,30 @@ public partial class JTailView : UserControl
                     tab.ScrollToEnd();
                 }
             }
+
+            if (tab == _selectedTab)
+            {
+                UpdateStatusBar();
+            }
         }
+    }
+
+    private void UpdateStatusBar()
+    {
+        var tab = _selectedTab;
+        TailingIndicator.IsVisible = tab is not null;
+        FileStatsText.IsVisible = tab is not null;
+
+        if (tab is null)
+        {
+            FilePathText.Text = "No file open";
+            return;
+        }
+
+        FilePathText.Text = tab.FilePath;
+        var document = tab.Editor.Document;
+        var lines = document.LineCount - (document.Lines[^1].Length == 0 ? 1 : 0);
+        FileStatsText.Text = $"{tab.FileSizeText}  ·  {lines:N0} {(lines == 1 ? "line" : "lines")} shown";
     }
 
     private void UpdateTitle()

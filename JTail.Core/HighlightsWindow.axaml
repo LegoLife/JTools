@@ -2,26 +2,65 @@
         xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Line Highlights"
-        Width="380"
+        Width="440"
         SizeToContent="Height"
         CanResize="False"
-        Background="{DynamicResource JBackgroundBrush}"
+        ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner">
-    <StackPanel Margin="16" Spacing="12">
-        <TextBlock Text="Lines containing a word below are highlighted with its color."
-                   Foreground="{DynamicResource JTextBrush}"
-                   TextWrapping="Wrap" />
-        <StackPanel Name="RulesList" Spacing="8" />
-        <Border BorderBrush="{DynamicResource JBorderBrush}" BorderThickness="0,1,0,0" Padding="0,12,0,0">
-            <StackPanel Spacing="8">
-                <TextBlock Text="Add a rule" Foreground="{DynamicResource JTextBrush}" />
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <TextBox Name="NewWordTextBox" Width="150" Watermark="Word to match" />
-                    <ColorPicker Name="NewColorPicker" />
-                    <Button Name="AddButton" Content="Add" Click="OnAddClick" />
-                </StackPanel>
+    <Window.Styles>
+        <StyleInclude Source="avares://JTail.Core/Themes/Controls.axaml" />
+        <!-- Square icon-only remove buttons in the rule rows -->
+        <Style Selector="Button.remove">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Width" Value="32" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="FontFamily" Value="{DynamicResource JIconFont}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource JTextDimBrush}" />
+        </Style>
+        <Style Selector="Button.remove:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource JSurfaceBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource JTextBrush}" />
+        </Style>
+    </Window.Styles>
+    <DockPanel>
+        <Border DockPanel.Dock="Bottom" Classes="dialogFooter">
+            <StackPanel Classes="buttons">
+                <Button Name="CloseButton" Content="Close" Classes="accent" IsCancel="True" Click="OnCloseClick" />
             </StackPanel>
         </Border>
-        <Button Name="CloseButton" Content="Close" HorizontalAlignment="Right" Click="OnCloseClick" />
-    </StackPanel>
+
+        <StackPanel Margin="20" Spacing="20">
+            <StackPanel Spacing="4">
+                <TextBlock Classes="sectionHeader" Text="Rules" />
+                <TextBlock Classes="caption" TextWrapping="Wrap"
+                           Text="Lines containing a word below are highlighted with its color." />
+            </StackPanel>
+
+            <StackPanel Spacing="8">
+                <TextBlock Name="NoRulesText" Classes="dim" Text="No highlight rules yet." FontStyle="Italic" IsVisible="False" />
+                <StackPanel Name="RulesList" Spacing="8" />
+            </StackPanel>
+
+            <Border Classes="card" Padding="12">
+                <StackPanel Spacing="8">
+                    <TextBlock Classes="fieldLabel" Text="Add a rule" Margin="0" />
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                        <ColorPicker Grid.Column="0" Name="NewColorPicker" />
+                        <TextBox Grid.Column="1" Name="NewWordTextBox" Watermark="Word to match" Margin="8,0" />
+                        <Button Grid.Column="2" Name="AddButton" Click="OnAddClick" IsDefault="True">
+                            <StackPanel Classes="iconLabel">
+                                <TextBlock Classes="icon" Text="&#xE710;" />
+                                <TextBlock Text="Add" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </DockPanel>
 </Window>
