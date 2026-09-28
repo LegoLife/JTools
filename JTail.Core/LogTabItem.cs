@@ -158,20 +158,6 @@ public sealed class LogTabItem
         return unitIndex == 0 ? $"{size:0} {units[unitIndex]}" : $"{size:0.#} {units[unitIndex]}";
     }
 
-    private const int AutoScrollVisibleLines = 100;
-
-    public void TrimToLastLines()
-    {
-        var document = Editor.Document;
-        if (document.LineCount <= AutoScrollVisibleLines)
-        {
-            return;
-        }
-
-        var firstKeptLine = document.GetLineByNumber(document.LineCount - AutoScrollVisibleLines + 1);
-        document.Remove(0, firstKeptLine.Offset);
-    }
-
     public void ScrollToEnd()
     {
         Editor.CaretOffset = Editor.Document.TextLength;

@@ -3,15 +3,12 @@ using System.Text;
 namespace JTail;
 
 /// <summary>
-/// Reads the tail of a text file and reports content appended after that point.
+/// Reads a text file and reports content appended after that point.
 /// Opens the file only for the duration of each read so it never holds a lock
 /// between polls, letting other processes write to it freely.
 /// </summary>
 public sealed class LogTailer
 {
-    private const int InitialLineCount = 100;
-    private const int ReadChunkSize = 64 * 1024;
-
     private readonly string _path;
     private long _position;
 
@@ -26,14 +23,22 @@ public sealed class LogTailer
     public long Length => _position;
 
     /// <summary>
-    /// Opens the file, reads its last <see cref="InitialLineCount"/> lines, and records the
-    /// end-of-file position so subsequent calls to <see cref="ReadAppendedText"/> pick up from there.
+    /// Opens the file, reads its entire contents, and records the end-of-file position so
+    /// subsequent calls to <see cref="ReadAppendedText"/> pick up from there.
     /// </summary>
-    public static LogTailer OpenAtTail(string path, out string initialText)
+    public static LogTailer Open(string path, out string initialText)
     {
         using var stream = OpenShared(path);
-        initialText = ReadLastLines(stream, InitialLineCount);
-        return new LogTailer(path, stream.Length);
+        var length = stream.Length;
+        var buffer = new byte[length];
+        stream.ReadExactly(buffer, 0, buffer.Length);
+
+        // Skip a UTF-8 byte order mark so it doesn't show up as a stray character.
+        var preamble = Encoding.UTF8.Preamble;
+        var start = buffer.AsSpan().StartsWith(preamble) ? preamble.Length : 0;
+        initialText = Encoding.UTF8.GetString(buffer, start, buffer.Length - start);
+
+        return new LogTailer(path, length);
     }
 
     /// <summary>
@@ -70,56 +75,4 @@ public sealed class LogTailer
         FileMode.Open,
         FileAccess.Read,
         FileShare.ReadWrite | FileShare.Delete);
-
-    private static string ReadLastLines(FileStream stream, int lineCount)
-    {
-        var length = stream.Length;
-        if (length == 0)
-        {
-            return string.Empty;
-        }
-
-        var newlinesFound = 0;
-        var position = length;
-        var chunks = new List<byte[]>();
-
-        while (position > 0 && newlinesFound <= lineCount)
-        {
-            var chunkSize = (int)Math.Min(ReadChunkSize, position);
-            position -= chunkSize;
-
-            var buffer = new byte[chunkSize];
-            stream.Seek(position, SeekOrigin.Begin);
-            stream.ReadExactly(buffer, 0, chunkSize);
-
-            for (var i = chunkSize - 1; i >= 0; i--)
-            {
-                if (buffer[i] == (byte)'\n')
-                {
-                    newlinesFound++;
-                    if (newlinesFound > lineCount)
-                    {
-                        position += i + 1;
-                        break;
-                    }
-                }
-            }
-
-            chunks.Add(buffer);
-        }
-
-        chunks.Reverse();
-        var combined = new byte[chunks.Sum(c => c.Length)];
-        var offset = 0;
-        foreach (var chunk in chunks)
-        {
-            Buffer.BlockCopy(chunk, 0, combined, offset, chunk.Length);
-            offset += chunk.Length;
-        }
-
-        var text = Encoding.UTF8.GetString(combined);
-        var lines = text.Split('\n');
-        var lastLines = lines.Skip(Math.Max(0, lines.Length - lineCount));
-        return string.Join('\n', lastLines);
-    }
 }

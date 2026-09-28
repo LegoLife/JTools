@@ -155,7 +155,8 @@
                            TextTrimming="PrefixCharacterEllipsis" />
                 <TextBlock Grid.Column="2" Name="FileStatsText" Classes="dim" Margin="20,0" IsVisible="False" />
                 <CheckBox Grid.Column="3" Name="AutoScrollCheckBox" Content="Auto-scroll" IsChecked="True"
-                          ToolTip.Tip="Follow new lines as they're written (keeps the last 100 lines)" />
+                          IsCheckedChanged="OnAutoScrollChanged"
+                          ToolTip.Tip="Follow new lines as they're written" />
             </Grid>
         </Border>
     </Grid>

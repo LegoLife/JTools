@@ -171,7 +171,7 @@ public partial class JTailView : UserControl
             return;
         }
 
-        var tailer = LogTailer.OpenAtTail(path, out var initialText);
+        var tailer = LogTailer.Open(path, out var initialText);
         var tab = new LogTabItem(path, tailer, initialText, _logTheme.Background, _logTheme.Text, _logTheme.FontSize, _highlightRules);
         tab.CloseRequested += (_, _) => CloseTab(tab);
         tab.SelectRequested += (_, _) => SelectTab(tab);
@@ -277,20 +277,23 @@ public partial class JTailView : UserControl
             tab.AppendText(appended);
             tab.RefreshFileSize();
 
-            if (AutoScrollCheckBox.IsChecked == true)
+            if (AutoScrollCheckBox.IsChecked == true && tab == _selectedTab)
             {
-                tab.TrimToLastLines();
-
-                if (tab == _selectedTab)
-                {
-                    tab.ScrollToEnd();
-                }
+                tab.ScrollToEnd();
             }
 
             if (tab == _selectedTab)
             {
                 UpdateStatusBar();
             }
+        }
+    }
+
+    private void OnAutoScrollChanged(object? sender, RoutedEventArgs e)
+    {
+        if (AutoScrollCheckBox.IsChecked == true)
+        {
+            _selectedTab?.ScrollToEnd();
         }
     }
 
@@ -309,7 +312,7 @@ public partial class JTailView : UserControl
         FilePathText.Text = tab.FilePath;
         var document = tab.Editor.Document;
         var lines = document.LineCount - (document.Lines[^1].Length == 0 ? 1 : 0);
-        FileStatsText.Text = $"{tab.FileSizeText}  ·  {lines:N0} {(lines == 1 ? "line" : "lines")} shown";
+        FileStatsText.Text = $"{tab.FileSizeText}  ·  {lines:N0} {(lines == 1 ? "line" : "lines")}";
     }
 
     private void UpdateTitle()
