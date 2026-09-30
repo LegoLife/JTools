@@ -58,6 +58,9 @@ public:
 private:
     enum class Tool { Tail, Expander };
 
+    /// Unscaled width of the side bar.
+    static constexpr float SideBarWidth = 84;
+
     void DrawSideBar(float height);
 
     ExpanderHost expander_;

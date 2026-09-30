@@ -14,7 +14,7 @@ namespace Widgets
     bool ToolButton(const char* id, const char* icon, const char* label, const char* trailingIcon = nullptr);
 
     /// Unscaled height of a NavButton.
-    constexpr float NavButtonHeight = 60;
+    constexpr float NavButtonHeight = 70;
 
     /// A side bar button: icon over a small label, with a filled background and accent pill when selected.
     bool NavButton(const char* id, const char* icon, const char* label, bool selected, float width);

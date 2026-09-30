@@ -68,7 +68,7 @@ void App::Draw()
                      | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoScrollWithMouse);
     ImGui::PopStyleVar(3);
 
-    const float sideBarWidth = S(72);
+    const float sideBarWidth = S(SideBarWidth);
     ImVec2 size = ImGui::GetContentRegionAvail();
     ImVec2 origin = ImGui::GetCursorScreenPos();
     DrawSideBar(size.y);
@@ -89,7 +89,7 @@ void App::Draw()
 void App::DrawSideBar(float height)
 {
     const Palette& p = Theme::Current();
-    const float width = S(72), margin = S(6);
+    const float width = S(SideBarWidth), margin = S(6);
     ImVec2 origin = ImGui::GetCursorScreenPos();
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     drawList->AddRectFilled(origin, ImVec2(origin.x + width, origin.y + height), p.chrome);
