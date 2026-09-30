@@ -1,5 +1,4 @@
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Avalonia;
 using Avalonia.Styling;
 
@@ -17,12 +16,6 @@ public enum AppTheme
 /// <summary>App-wide preferences, saved to %APPDATA%\JTools\settings.json.</summary>
 public sealed class JToolsSettings
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        WriteIndented = true,
-        Converters = { new JsonStringEnumConverter() },
-    };
-
     private static readonly string FilePath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "JTools", "settings.json");
 
@@ -32,7 +25,7 @@ public sealed class JToolsSettings
     {
         try
         {
-            return JsonSerializer.Deserialize<JToolsSettings>(File.ReadAllText(FilePath), JsonOptions) ?? new JToolsSettings();
+            return JsonSerializer.Deserialize(File.ReadAllText(FilePath), JsonContext.Default.JToolsSettings) ?? new JToolsSettings();
         }
         catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
         {
@@ -45,7 +38,7 @@ public sealed class JToolsSettings
         try
         {
             Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);
-            File.WriteAllText(FilePath, JsonSerializer.Serialize(this, JsonOptions));
+            File.WriteAllText(FilePath, JsonSerializer.Serialize(this, JsonContext.Default.JToolsSettings));
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {

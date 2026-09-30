@@ -28,7 +28,7 @@ public sealed class RecentFilesStore
         try
         {
             var json = File.ReadAllText(FilePath);
-            var paths = JsonSerializer.Deserialize<List<string>>(json);
+            var paths = JsonSerializer.Deserialize(json, JsonContext.Default.ListString);
             return new RecentFilesStore(paths ?? []);
         }
         catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
@@ -68,7 +68,7 @@ public sealed class RecentFilesStore
         {
             var directory = Path.GetDirectoryName(FilePath)!;
             Directory.CreateDirectory(directory);
-            File.WriteAllText(FilePath, JsonSerializer.Serialize(_paths));
+            File.WriteAllText(FilePath, JsonSerializer.Serialize(_paths, JsonContext.Default.ListString));
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {

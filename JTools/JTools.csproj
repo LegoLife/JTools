@@ -10,20 +10,24 @@
         <AssemblyName>JTools</AssemblyName>
         <RootNamespace>JTools</RootNamespace>
         <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
-        <Version>0.3.0</Version>
+        <Version>0.5.0</Version>
     </PropertyGroup>
 
     <ItemGroup>
         <AvaloniaResource Include="Assets\icon.ico" />
     </ItemGroup>
 
-    <!-- Only apply single-file / self-contained / R2R when publishing (not when debugging) -->
+    <!-- Only apply single-file / self-contained / trimming when publishing (not when debugging).
+         Trimming drops the unused parts of .NET and Avalonia, and compression shrinks what's left.
+         ReadyToRun is off: it roughly doubles every assembly's size for a slightly faster cold start. -->
     <PropertyGroup Condition="'$(Configuration)' != 'Debug'">
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
         <SelfContained>true</SelfContained>
-        <PublishReadyToRun>true</PublishReadyToRun>
         <PublishSingleFile>true</PublishSingleFile>
         <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+        <PublishTrimmed>true</PublishTrimmed>
+        <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+        <DebugType>none</DebugType>
     </PropertyGroup>
 
     <ItemGroup>

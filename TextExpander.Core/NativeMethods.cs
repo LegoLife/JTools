@@ -112,4 +112,65 @@ internal static class NativeMethods
 
     [DllImport("user32.dll")]
     public static extern uint MapVirtualKey(uint uCode, uint uMapType);
+
+    public const uint CF_BITMAP = 2;
+    public const uint CF_METAFILEPICT = 3;
+    public const uint CF_PALETTE = 9;
+    public const uint CF_UNICODETEXT = 13;
+    public const uint CF_ENHMETAFILE = 14;
+    public const uint CF_OWNERDISPLAY = 0x0080;
+    public const uint CF_DSPBITMAP = 0x0082;
+    public const uint CF_DSPMETAFILEPICT = 0x0083;
+    public const uint CF_DSPENHMETAFILE = 0x008E;
+    public const uint CF_PRIVATEFIRST = 0x0200;
+    public const uint CF_PRIVATELAST = 0x02FF;
+    public const uint CF_GDIOBJFIRST = 0x0300;
+    public const uint CF_GDIOBJLAST = 0x03FF;
+
+    public const uint GMEM_MOVEABLE = 0x0002;
+    public static readonly IntPtr HWND_MESSAGE = new(-3);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    public static extern IntPtr CreateWindowEx(uint dwExStyle, string lpClassName, string lpWindowName, uint dwStyle,
+        int x, int y, int nWidth, int nHeight, IntPtr hWndParent, IntPtr hMenu, IntPtr hInstance, IntPtr lpParam);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool OpenClipboard(IntPtr hWndNewOwner);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool CloseClipboard();
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool EmptyClipboard();
+
+    [DllImport("user32.dll")]
+    public static extern uint EnumClipboardFormats(uint format);
+
+    [DllImport("user32.dll")]
+    public static extern IntPtr GetClipboardData(uint uFormat);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern IntPtr SetClipboardData(uint uFormat, IntPtr hMem);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    public static extern uint RegisterClipboardFormat(string lpszFormat);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    public static extern IntPtr GlobalAlloc(uint uFlags, UIntPtr dwBytes);
+
+    [DllImport("kernel32.dll")]
+    public static extern IntPtr GlobalFree(IntPtr hMem);
+
+    [DllImport("kernel32.dll")]
+    public static extern IntPtr GlobalLock(IntPtr hMem);
+
+    [DllImport("kernel32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool GlobalUnlock(IntPtr hMem);
+
+    [DllImport("kernel32.dll")]
+    public static extern UIntPtr GlobalSize(IntPtr hMem);
 }

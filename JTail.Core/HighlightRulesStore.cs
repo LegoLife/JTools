@@ -27,7 +27,7 @@ public sealed class HighlightRulesStore
         try
         {
             var json = File.ReadAllText(FilePath);
-            var rules = JsonSerializer.Deserialize<List<HighlightRule>>(json);
+            var rules = JsonSerializer.Deserialize(json, JsonContext.Default.ListHighlightRule);
             return new HighlightRulesStore(rules ?? []);
         }
         catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
@@ -66,7 +66,7 @@ public sealed class HighlightRulesStore
         {
             var directory = Path.GetDirectoryName(FilePath)!;
             Directory.CreateDirectory(directory);
-            File.WriteAllText(FilePath, JsonSerializer.Serialize(_rules));
+            File.WriteAllText(FilePath, JsonSerializer.Serialize(_rules, JsonContext.Default.ListHighlightRule));
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {

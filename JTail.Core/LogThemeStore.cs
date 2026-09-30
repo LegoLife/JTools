@@ -48,7 +48,7 @@ public sealed class LogThemeStore
         try
         {
             var json = File.ReadAllText(FilePath);
-            var data = JsonSerializer.Deserialize<ThemeData>(json);
+            var data = JsonSerializer.Deserialize(json, JsonContext.Default.ThemeData);
             if (data is null)
             {
                 return new LogThemeStore(null, null, DefaultFontSize);
@@ -98,7 +98,7 @@ public sealed class LogThemeStore
             var directory = Path.GetDirectoryName(FilePath)!;
             Directory.CreateDirectory(directory);
             var data = new ThemeData(Background?.ToString(), Text?.ToString(), FontSize, CurrentVersion);
-            File.WriteAllText(FilePath, JsonSerializer.Serialize(data));
+            File.WriteAllText(FilePath, JsonSerializer.Serialize(data, JsonContext.Default.ThemeData));
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
@@ -106,5 +106,5 @@ public sealed class LogThemeStore
         }
     }
 
-    private sealed record ThemeData(string? Background, string? Text, double FontSize, int Version = 0);
+    internal sealed record ThemeData(string? Background, string? Text, double FontSize, int Version = 0);
 }

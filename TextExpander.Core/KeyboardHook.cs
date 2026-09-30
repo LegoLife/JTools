@@ -16,6 +16,7 @@ public sealed class KeyboardHook : IDisposable
     public static readonly IntPtr InjectedMarker = new(0x54455850);
 
     private const int MaxBufferLength = 64;
+    private const int ReinstallIntervalMs = 10000;
 
     private readonly SnippetStore _store;
     private readonly AppSettings _settings;
@@ -24,6 +25,7 @@ public sealed class KeyboardHook : IDisposable
     private readonly StringBuilder _buffer = new();
     private readonly byte[] _keyState = new byte[256];
     private readonly StringBuilder _translated = new(8);
+    private readonly Timer _reinstallTimer;
     private IntPtr _hook;
     private IntPtr _lastWindow;
 
@@ -39,6 +41,27 @@ public sealed class KeyboardHook : IDisposable
         _hook = SetWindowsHookEx(WH_KEYBOARD_LL, _proc, GetModuleHandle(null), 0);
         if (_hook == IntPtr.Zero)
             throw new Win32Exception(Marshal.GetLastWin32Error(), "Failed to install keyboard hook.");
+
+        // Windows silently removes a low-level hook that ever responds too slowly (e.g. while the
+        // system is busy), and there's no way to tell when it has, so reinstall it periodically.
+        _reinstallTimer = new Timer(_ => _uiContext.Post(_ => Reinstall(), null), null,
+            ReinstallIntervalMs, ReinstallIntervalMs);
+    }
+
+    /// <remarks>
+    /// Runs on the UI thread. Keystrokes are only delivered while that thread waits for messages,
+    /// so none are missed or seen twice while both hooks exist.
+    /// </remarks>
+    private void Reinstall()
+    {
+        if (_hook == IntPtr.Zero)
+            return; // disposed
+
+        var fresh = SetWindowsHookEx(WH_KEYBOARD_LL, _proc, GetModuleHandle(null), 0);
+        if (fresh == IntPtr.Zero)
+            return;
+        UnhookWindowsHookEx(_hook);
+        _hook = fresh;
     }
 
     private IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
@@ -181,6 +204,7 @@ public sealed class KeyboardHook : IDisposable
 
     public void Dispose()
     {
+        _reinstallTimer.Dispose();
         if (_hook != IntPtr.Zero)
         {
             UnhookWindowsHookEx(_hook);

@@ -1,5 +1,4 @@
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace TextExpander;
 
@@ -15,12 +14,6 @@ public enum ExpandMode
 /// <summary>User preferences, saved to %APPDATA%\TextExpander\settings.json.</summary>
 public sealed class AppSettings
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        WriteIndented = true,
-        Converters = { new JsonStringEnumConverter() },
-    };
-
     private static readonly string FilePath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "TextExpander", "settings.json");
 
@@ -40,13 +33,13 @@ public sealed class AppSettings
         if (!File.Exists(FilePath))
             return new AppSettings();
 
-        return JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(FilePath), JsonOptions) ?? new AppSettings();
+        return JsonSerializer.Deserialize(File.ReadAllText(FilePath), JsonContext.Default.AppSettings) ?? new AppSettings();
     }
 
     public void Save()
     {
         Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);
-        File.WriteAllText(FilePath, JsonSerializer.Serialize(this, JsonOptions));
+        File.WriteAllText(FilePath, JsonSerializer.Serialize(this, JsonContext.Default.AppSettings));
         Changed?.Invoke();
     }
 

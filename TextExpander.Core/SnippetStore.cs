@@ -11,8 +11,6 @@ public sealed class Snippet
 /// <summary>Loads and saves abbreviations to %APPDATA%\TextExpander\snippets.json.</summary>
 public sealed class SnippetStore
 {
-    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
-
     public string FilePath { get; } = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "TextExpander", "snippets.json");
 
@@ -34,7 +32,7 @@ public sealed class SnippetStore
         }
 
         var json = File.ReadAllText(FilePath);
-        Snippets = JsonSerializer.Deserialize<List<Snippet>>(json, JsonOptions) ?? [];
+        Snippets = JsonSerializer.Deserialize(json, JsonContext.Default.ListSnippet) ?? [];
         return false;
     }
 
@@ -42,7 +40,7 @@ public sealed class SnippetStore
     {
         Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);
         var tempPath = FilePath + ".tmp";
-        File.WriteAllText(tempPath, JsonSerializer.Serialize(Snippets, JsonOptions));
+        File.WriteAllText(tempPath, JsonSerializer.Serialize(Snippets, JsonContext.Default.ListSnippet));
         File.Move(tempPath, FilePath, overwrite: true);
     }
 

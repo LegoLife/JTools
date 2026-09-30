@@ -16,7 +16,7 @@
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="CornerRadius" Value="4" />
             <Setter Property="Margin" Value="6,2" />
-            <Setter Property="Padding" Value="0,9" />
+            <Setter Property="Padding" Value="0,11" />
             <Setter Property="HorizontalAlignment" Value="Stretch" />
             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
             <Setter Property="Cursor" Value="Hand" />
@@ -52,15 +52,15 @@
             <Setter Property="HorizontalAlignment" Value="Center" />
         </Style>
         <Style Selector="Button.nav TextBlock.icon">
-            <Setter Property="FontSize" Value="18" />
+            <Setter Property="FontSize" Value="26" />
             <Setter Property="HorizontalAlignment" Value="Center" />
         </Style>
         <Style Selector="Button.nav TextBlock.label">
-            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontSize" Value="14" />
             <Setter Property="HorizontalAlignment" Value="Center" />
         </Style>
     </Window.Styles>
-    <Grid ColumnDefinitions="72,*">
+    <Grid ColumnDefinitions="84,*">
         <Border Grid.Column="0" Background="{DynamicResource JChromeBrush}"
                 BorderBrush="{DynamicResource JBorderBrush}" BorderThickness="0,0,1,0">
             <DockPanel Margin="0,6">
