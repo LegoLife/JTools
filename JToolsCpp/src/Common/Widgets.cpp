@@ -69,7 +69,7 @@ bool Widgets::ToolButton(const char* id, const char* icon, const char* label, co
 
 bool Widgets::NavButton(const char* id, const char* icon, const char* label, bool selected, float width)
 {
-    const float height = S(54), iconSize = S(Theme::Em(18)), labelSize = S(Theme::Em(11));
+    const float height = S(NavButtonHeight), iconSize = S(Theme::Em(21)), labelSize = S(Theme::Em(12.5f));
     ImVec2 min = ImGui::GetCursorScreenPos();
     ImVec2 max(min.x + width, min.y + height);
     bool clicked = ImGui::InvisibleButton(id, ImVec2(width, height));

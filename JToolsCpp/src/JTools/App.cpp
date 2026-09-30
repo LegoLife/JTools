@@ -106,7 +106,7 @@ void App::DrawSideBar(float height)
         tool_ = Tool::Expander;
     ImGui::SetItemTooltip("Text Expander: abbreviations");
 
-    ImGui::SetCursorScreenPos(ImVec2(origin.x + margin, origin.y + height - margin - S(54)));
+    ImGui::SetCursorScreenPos(ImVec2(origin.x + margin, origin.y + height - margin - S(NavButtonHeight)));
     if (NavButton("##theme", Icon::Theme, "Theme", false, buttonWidth))
         ImGui::OpenPopup("##themeMenu");
     ImGui::SetItemTooltip("Dark or light theme");
