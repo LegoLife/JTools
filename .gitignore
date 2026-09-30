@@ -10,3 +10,6 @@ publish/
 ## OS
 .DS_Store
 Thumbs.db
+
+## C++ (JToolsCpp)
+JToolsCpp/build/
