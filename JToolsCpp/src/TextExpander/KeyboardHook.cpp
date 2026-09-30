@@ -56,6 +56,10 @@ DWORD WINAPI KeyboardHook::ThreadMain(void* parameter)
 {
     auto* self = (KeyboardHook*)parameter;
 
+    // Windows silently removes a low-level hook that ever responds too slowly, so keep this thread
+    // ahead of busy apps.
+    SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
+
     // Create the thread's message queue before signaling, so the quit message can't arrive too early.
     MSG msg;
     PeekMessageW(&msg, nullptr, WM_USER, WM_USER, PM_NOREMOVE);
@@ -64,8 +68,23 @@ DWORD WINAPI KeyboardHook::ThreadMain(void* parameter)
     if (!self->hook_)
         return 1;
 
+    // There's no way to tell when Windows has removed the hook, so reinstall it periodically.
+    // Keystrokes are only delivered while this thread waits for messages, so none are missed or
+    // seen twice while both hooks exist.
+    SetTimer(nullptr, 0, ReinstallIntervalMs, nullptr);
     while (GetMessageW(&msg, nullptr, 0, 0) > 0)
+    {
+        if (msg.message == WM_TIMER)
+        {
+            if (HHOOK fresh = SetWindowsHookExW(WH_KEYBOARD_LL, HookProc, GetModuleHandleW(nullptr), 0))
+            {
+                UnhookWindowsHookEx(self->hook_);
+                self->hook_ = fresh;
+            }
+            continue;
+        }
         DispatchMessageW(&msg);
+    }
 
     UnhookWindowsHookEx(self->hook_);
     return 0;

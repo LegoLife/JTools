@@ -37,6 +37,7 @@ private:
     std::wstring Translate(const KBDLLHOOKSTRUCT& info, HWND foreground);
 
     static constexpr size_t MaxBufferLength = 64;
+    static constexpr UINT ReinstallIntervalMs = 10000;
 
     const SnippetStore& store_;
     const SharedSettings& settings_;
