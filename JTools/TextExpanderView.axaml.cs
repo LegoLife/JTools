@@ -49,18 +49,27 @@ public partial class TextExpanderView : UserControl
     {
         _expander = expander;
 
-        EnabledSwitch.IsChecked = expander.Enabled;
-        EnabledSwitch.IsEnabled = expander.IsAvailable;
         EnabledSwitch.IsCheckedChanged += (_, _) => expander.Enabled = EnabledSwitch.IsChecked == true;
         expander.EnabledChanged += () => EnabledSwitch.IsChecked = expander.Enabled;
 
-        // If another process owns expansion it also owns the abbreviation file, so don't edit it here.
-        UnavailableBanner.IsVisible = !expander.IsAvailable;
-        EditorArea.IsEnabled = expander.IsAvailable;
-        SettingsButton.IsEnabled = expander.IsAvailable;
+        expander.StateChanged += OnExpanderStateChanged;
+        OnExpanderStateChanged();
 
         expander.Settings.Changed += UpdateHint;
         UpdateHint();
+    }
+
+    /// <summary>Expansion was turned on or off; starting it also reloads the abbreviation file.</summary>
+    private void OnExpanderStateChanged()
+    {
+        var expander = _expander!;
+        EnabledSwitch.IsChecked = expander.Enabled;
+        EnabledSwitch.IsEnabled = expander.IsAvailable;
+
+        // If another process owns expansion it also owns the abbreviation file, so don't edit it here.
+        UnavailableBanner.IsVisible = expander.IsStarted && !expander.IsAvailable;
+        EditorArea.IsEnabled = expander.IsAvailable;
+        SettingsButton.IsEnabled = expander.IsAvailable;
 
         RefreshList(null);
         if (SnippetList.ItemCount > 0)

@@ -33,7 +33,7 @@
             <StackPanel Orientation="Horizontal" Spacing="10">
                 <TextBlock Classes="icon warning" Text="&#xE7BA;" VerticalAlignment="Top" Margin="0,2,0,0" />
                 <TextBlock Classes="warning" TextWrapping="Wrap" MaxWidth="720"
-                           Text="The standalone Text Expander app is running, so it is handling expansion. Exit it from its tray icon and restart JTools to manage abbreviations here." />
+                           Text="The standalone Text Expander app is running, so it is handling expansion. Exit it from its tray icon, then turn Expand off and on again under Tools (or restart JTools) to manage abbreviations here." />
             </StackPanel>
         </Border>
 

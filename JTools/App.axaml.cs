@@ -36,8 +36,7 @@ public partial class App : Application
             _expander = new ExpanderHost();
 
             _window = new MainWindow();
-            _window.AttachExpander(_expander);
-            _window.AttachSettings(_settings);
+            _window.Attach(_settings, _expander);
             _window.ExitRequested += (_, _) => Exit();
 
             CreateTrayIcon(_expander);
@@ -60,8 +59,6 @@ public partial class App : Application
         var expansionItem = new NativeMenuItem("Text expansion enabled")
         {
             ToggleType = NativeMenuItemToggleType.CheckBox,
-            IsChecked = expander.Enabled,
-            IsEnabled = expander.IsAvailable,
         };
         expansionItem.Click += (_, _) => expander.Enabled = !expander.Enabled;
         expander.EnabledChanged += () => expansionItem.IsChecked = expander.Enabled;
@@ -80,19 +77,39 @@ public partial class App : Application
         var exitItem = new NativeMenuItem("Exit");
         exitItem.Click += (_, _) => Exit();
 
+        var menu = new NativeMenu
+        {
+            openItem,
+            new NativeMenuItemSeparator(),
+            expansionItem,
+            startupItem,
+            new NativeMenuItemSeparator(),
+            exitItem,
+        };
+
+        // The expansion switch only means something while the Expand tool is turned on.
+        void UpdateExpansionItem()
+        {
+            expansionItem.IsChecked = expander.Enabled;
+            expansionItem.IsEnabled = expander.IsAvailable;
+            bool shown = menu.Items.Contains(expansionItem);
+            if (expander.IsStarted && !shown)
+            {
+                menu.Items.Insert(menu.Items.IndexOf(startupItem), expansionItem);
+            }
+            else if (!expander.IsStarted && shown)
+            {
+                menu.Items.Remove(expansionItem);
+            }
+        }
+        expander.StateChanged += UpdateExpansionItem;
+        UpdateExpansionItem();
+
         _trayIcon = new TrayIcon
         {
             Icon = new WindowIcon(AssetLoader.Open(new Uri("avares://JTools/Assets/icon.ico"))),
             ToolTipText = "JTools",
-            Menu = new NativeMenu
-            {
-                openItem,
-                new NativeMenuItemSeparator(),
-                expansionItem,
-                startupItem,
-                new NativeMenuItemSeparator(),
-                exitItem,
-            },
+            Menu = menu,
         };
         _trayIcon.Clicked += (_, _) => ShowMainWindow();
         TrayIcon.SetIcons(this, [_trayIcon]);

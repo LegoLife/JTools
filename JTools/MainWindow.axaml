@@ -77,6 +77,19 @@
                         <TextBlock Classes="label" Text="Theme" />
                     </StackPanel>
                 </Button>
+                <Button DockPanel.Dock="Bottom" Name="ToolsButton" Classes="nav" ToolTip.Tip="Turn tools on or off">
+                    <Button.Flyout>
+                        <MenuFlyout Placement="RightEdgeAlignedBottom">
+                            <MenuItem Name="TailToolItem" Header="Tail" ToggleType="CheckBox" Click="OnToolItemClick" />
+                            <MenuItem Name="ExpanderToolItem" Header="Expand" ToggleType="CheckBox" Click="OnToolItemClick" />
+                            <MenuItem Name="RegexToolItem" Header="Regex" ToggleType="CheckBox" Click="OnToolItemClick" />
+                        </MenuFlyout>
+                    </Button.Flyout>
+                    <StackPanel>
+                        <TextBlock Classes="icon" Text="&#xE71D;" />
+                        <TextBlock Classes="label" Text="Tools" />
+                    </StackPanel>
+                </Button>
                 <StackPanel>
                     <Button Name="TailNavButton" Classes="nav" Click="OnTailNavClick" ToolTip.Tip="JTail: tail log files">
                         <Panel>

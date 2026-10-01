@@ -43,8 +43,10 @@ Windows SmartScreen may warn you the first time because the exe isn't code-signe
 - **Copy as C#** copies `new Regex(@"...", RegexOptions...)`. Right-click the table to copy a cell or the whole table as TSV.
 - Your last pattern, test text and options are remembered.
 
-## Themes and tray
+## Side bar, themes and tray
 
+- **Tools** at the bottom of the side bar turns each tool on or off. A tool that's off is hidden and stops running: Tail closes its files, and Expand stops watching the keyboard. One tool always stays on.
+- JTools opens on the tool you used last.
 - Dark, Light, or match your Windows setting (**Theme** at the bottom of the side bar).
 - JTools runs from the system tray. Closing the window only hides it, so text expansion keeps working. Quit from the tray menu.
 - Optionally **Start with Windows** (tray menu). It starts hidden in the tray.
@@ -53,7 +55,7 @@ Windows SmartScreen may warn you the first time because the exe isn't code-signe
 
 ## Notes
 
-- Only one app can expand text at a time. If the standalone Text Expander is running, exit it first.
+- Only one app can expand text at a time. If the standalone Text Expander is running, exit it first, or turn Expand off in JTools.
 - Text can't be expanded in apps running as administrator unless JTools also runs as administrator (a Windows security rule).
 
 ## Building

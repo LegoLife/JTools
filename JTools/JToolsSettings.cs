@@ -13,6 +13,14 @@ public enum AppTheme
     System,
 }
 
+/// <summary>A tool in the side bar.</summary>
+public enum Tool
+{
+    Tail,
+    Expander,
+    Regex,
+}
+
 /// <summary>App-wide preferences, saved to %APPDATA%\JTools\settings.json.</summary>
 public sealed class JToolsSettings
 {
@@ -20,6 +28,14 @@ public sealed class JToolsSettings
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "JTools", "settings.json");
 
     public AppTheme Theme { get; set; } = AppTheme.Dark;
+
+    /// <summary>Tools turned off in the side bar's Tools menu: hidden, and not running.</summary>
+    public List<Tool> DisabledTools { get; set; } = [];
+
+    /// <summary>The tool used last, shown when JTools starts.</summary>
+    public Tool LastTool { get; set; } = Tool.Tail;
+
+    public bool IsEnabled(Tool tool) => !DisabledTools.Contains(tool);
 
     public static JToolsSettings Load()
     {

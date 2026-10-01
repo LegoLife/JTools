@@ -328,6 +328,15 @@ public partial class JTailView : UserControl
         TitleChanged?.Invoke(this, EventArgs.Empty);
     }
 
+    /// <summary>Closes every open file, which also stops tailing.</summary>
+    public void CloseAllTabs()
+    {
+        foreach (var tab in _tabs.ToList())
+        {
+            CloseTab(tab);
+        }
+    }
+
     /// <summary>Stops polling files for changes; call when the hosting window closes.</summary>
     public void StopTailing()
     {
