@@ -59,19 +59,23 @@ public partial class MainWindow : Window
 
     private void OnExpanderNavClick(object? sender, RoutedEventArgs e) => ShowTool(ExpanderView);
 
+    private void OnRegexNavClick(object? sender, RoutedEventArgs e) => ShowTool(RegexView);
+
     private void ShowTool(Control tool)
     {
         // Tools stay in the visual tree while hidden, so JTail keeps tailing in the background.
         TailView.IsVisible = tool == TailView;
         ExpanderView.IsVisible = tool == ExpanderView;
+        RegexView.IsVisible = tool == RegexView;
         TailNavButton.Classes.Set("selected", tool == TailView);
         ExpanderNavButton.Classes.Set("selected", tool == ExpanderView);
+        RegexNavButton.Classes.Set("selected", tool == RegexView);
         UpdateTitle();
     }
 
     private void UpdateTitle()
     {
-        var toolTitle = TailView.IsVisible ? TailView.Title : "Text Expander";
+        var toolTitle = TailView.IsVisible ? TailView.Title : RegexView.IsVisible ? "Regex Tester" : "Text Expander";
         Title = $"{AppName} — {toolTitle}";
     }
 
@@ -80,6 +84,7 @@ public partial class MainWindow : Window
     {
         _closingForExit = true;
         TailView.StopTailing();
+        RegexView.SaveState();
         Close();
     }
 

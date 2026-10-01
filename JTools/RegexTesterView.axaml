@@ -1,0 +1,176 @@
+<UserControl x:Class="JTools.RegexTesterView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ae="using:AvaloniaEdit"
+             Background="{DynamicResource JBackgroundBrush}">
+    <UserControl.Styles>
+        <!-- Pattern and test text editors, framed like the app's TextBoxes -->
+        <Style Selector="Border.editorFrame">
+            <Setter Property="Background" Value="{DynamicResource JInputBackgroundBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource JBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="4" />
+        </Style>
+        <Style Selector="Border.editorFrame:pointerover">
+            <Setter Property="BorderBrush" Value="{DynamicResource JTextDimBrush}" />
+        </Style>
+        <Style Selector="Border.editorFrame:focus-within">
+            <Setter Property="BorderBrush" Value="{DynamicResource JAccentBrush}" />
+        </Style>
+        <Style Selector="Border.editorFrame.invalid, Border.editorFrame.invalid:focus-within">
+            <Setter Property="BorderBrush" Value="{DynamicResource JErrorTextBrush}" />
+        </Style>
+        <Style Selector="ae|TextEditor">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="FontFamily" Value="{DynamicResource JMonoFont}" />
+            <Setter Property="FontSize" Value="13" />
+        </Style>
+
+        <!-- Option chips: i m s x n -->
+        <Style Selector="ToggleButton.option">
+            <Setter Property="FontFamily" Value="{DynamicResource JMonoFont}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Width" Value="30" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+
+        <Style Selector="TextBlock.error">
+            <Setter Property="Foreground" Value="{DynamicResource JErrorTextBrush}" />
+        </Style>
+
+        <!-- Results grid (built in MatchTable.cs): bordered cells, a shaded header row, one row per match -->
+        <Style Selector="Border.tableFrame">
+            <Setter Property="BorderBrush" Value="{DynamicResource JBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="ClipToBounds" Value="True" />
+        </Style>
+        <Style Selector="Border.headerRow">
+            <Setter Property="Background" Value="{DynamicResource JSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource JBorderBrush}" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+        </Style>
+        <Style Selector="Border.row">
+            <Setter Property="BorderBrush" Value="{DynamicResource JBorderBrush}" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="Border.cell">
+            <Setter Property="BorderBrush" Value="{DynamicResource JBorderBrush}" />
+            <Setter Property="BorderThickness" Value="0,0,1,0" />
+            <Setter Property="Padding" Value="10,6" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="Border.cell.last">
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style Selector="Border.cell TextBlock">
+            <Setter Property="FontFamily" Value="{DynamicResource JMonoFont}" />
+            <Setter Property="FontWeight" Value="Normal" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Border.headerRow Border.cell TextBlock">
+            <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style Selector="ListBox.table ListBoxItem">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="CornerRadius" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        </Style>
+        <Style Selector="ListBox.table ListBoxItem /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="CornerRadius" Value="0" />
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,*">
+        <!-- Header: title, copy as C# -->
+        <Border Grid.Row="0" Classes="toolbar" Padding="20,10,12,10">
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Name="CopyCSharpButton" Classes="tool" Click="OnCopyCSharpClick"
+                        VerticalAlignment="Center" ToolTip.Tip="Copy the pattern and options as a C# new Regex(...) expression">
+                    <StackPanel>
+                        <TextBlock Classes="icon" Text="&#xE8C8;" />
+                        <TextBlock Name="CopyCSharpLabel" Text="Copy as C#" />
+                    </StackPanel>
+                </Button>
+                <TextBlock Classes="title" Text="Regex Tester" VerticalAlignment="Center" />
+            </DockPanel>
+        </Border>
+
+        <Grid Grid.Row="1" Margin="16" RowDefinitions="Auto,Auto,Auto,Auto,3*,Auto,2*">
+            <!-- Pattern + options -->
+            <TextBlock Grid.Row="0" Classes="fieldLabel" Text="Pattern" />
+            <DockPanel Grid.Row="1">
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4" Margin="8,0,0,0"
+                            VerticalAlignment="Top">
+                    <ToggleButton Name="IgnoreCaseToggle" Classes="option" Content="i"
+                                  ToolTip.Tip="Ignore case" />
+                    <ToggleButton Name="MultilineToggle" Classes="option" Content="m"
+                                  ToolTip.Tip="Multiline: ^ and $ match at the start and end of every line" />
+                    <ToggleButton Name="SinglelineToggle" Classes="option" Content="s"
+                                  ToolTip.Tip="Singleline: . also matches newlines" />
+                    <ToggleButton Name="IgnoreWhitespaceToggle" Classes="option" Content="x"
+                                  ToolTip.Tip="Ignore pattern whitespace: spaces and # comments in the pattern are ignored, and Enter starts a new line" />
+                    <ToggleButton Name="ExplicitCaptureToggle" Classes="option" Content="n"
+                                  ToolTip.Tip="Explicit capture: only named groups (?&lt;name&gt;…) capture" />
+                </StackPanel>
+                <Border Name="PatternFrame" Classes="editorFrame" MinHeight="30">
+                    <Panel>
+                        <ae:TextEditor Name="PatternEditor" WordWrap="True" Padding="8,5" MaxHeight="160"
+                                       ShowLineNumbers="False"
+                                       HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" />
+                        <TextBlock Name="PatternWatermark" Classes="dim" Text="Enter a regular expression"
+                                   FontFamily="{DynamicResource JMonoFont}" FontSize="13" Margin="11,6,0,0"
+                                   IsHitTestVisible="False" />
+                    </Panel>
+                </Border>
+            </DockPanel>
+            <TextBlock Grid.Row="2" Name="ErrorText" Classes="error" TextWrapping="Wrap" Margin="0,6,0,0"
+                       IsVisible="False" />
+
+            <!-- Test text -->
+            <TextBlock Grid.Row="3" Classes="fieldLabel" Text="Test text" Margin="0,16,0,6" />
+            <Border Grid.Row="4" Classes="editorFrame">
+                <ae:TextEditor Name="SampleEditor" WordWrap="True" ShowLineNumbers="True" Padding="8,6"
+                               HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" />
+            </Border>
+
+            <GridSplitter Grid.Row="5" Height="12" Background="Transparent" ResizeDirection="Rows" />
+
+            <!-- Results -->
+            <Border Grid.Row="6" Classes="card" Padding="0">
+                <DockPanel>
+                    <Border DockPanel.Dock="Top" Padding="16,10" BorderBrush="{DynamicResource JBorderBrush}"
+                            BorderThickness="0,0,0,1">
+                        <TextBlock Name="StatusText" Classes="dim" />
+                    </Border>
+                    <ScrollViewer Name="TableScroller" HorizontalScrollBarVisibility="Auto"
+                                  VerticalScrollBarVisibility="Disabled" Margin="12">
+                        <Border Name="TableFrame" Classes="tableFrame" HorizontalAlignment="Left">
+                            <DockPanel>
+                                <Border DockPanel.Dock="Top" Name="TableHeaderHost" />
+                                <ListBox Name="ResultsList" Classes="table" SelectionMode="Single">
+                                    <ListBox.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Copy cell" Click="OnCopyCellClick" />
+                                            <MenuItem Header="Copy all as TSV" Click="OnCopyAllClick" />
+                                        </ContextMenu>
+                                    </ListBox.ContextMenu>
+                                </ListBox>
+                            </DockPanel>
+                        </Border>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

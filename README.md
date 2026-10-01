@@ -1,9 +1,10 @@
 # JTools
 
-A small Windows tray app that puts two everyday tools in one window:
+A small Windows tray app that puts three everyday tools in one window:
 
 - **Tail**: a live log viewer. Open several log files in tabs, watch new lines as they're written, and highlight lines that contain words like `ERROR` or `WARN`.
 - **Expand**: a text expander. Type an abbreviation such as `;sig` in any app and it expands into the full text.
+- **Regex**: a regular expression tester. Write a .NET regex and see its matches and capture groups in your sample text as you type.
 
 ![JTail tailing a log file with ERROR and WARN lines highlighted](docs/screenshots/tail-dark.png)
 
@@ -31,6 +32,16 @@ Windows SmartScreen may warn you the first time because the exe isn't code-signe
 - Turn expansion on or off with the switch at the top.
 
 ![Text Expander with a list of abbreviations](docs/screenshots/expand-dark.png)
+
+## Regex
+
+- Type a pattern and some test text. Matches are highlighted as you type, in alternating shades so neighboring matches stay distinct.
+- The table has a row per match: its index, position and matched string, then a column per capture group, headed the way a replacement refers to it (`$1`, `${year}`). Groups that didn't take part in a match show `—`.
+- Click a cell to outline that match or group in the text; click inside a match in the text to jump to its row.
+- Option toggles: `i` ignore case, `m` multiline, `s` singleline, `x` ignore pattern whitespace (Enter adds a new line), `n` explicit capture.
+- Invalid patterns show the error and underline where it went wrong. Runs stop after 3 seconds, so a runaway pattern can't freeze the app.
+- **Copy as C#** copies `new Regex(@"...", RegexOptions...)`. Right-click the table to copy a cell or the whole table as TSV.
+- Your last pattern, test text and options are remembered.
 
 ## Themes and tray
 

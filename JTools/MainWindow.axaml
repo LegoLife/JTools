@@ -96,12 +96,22 @@
                             </StackPanel>
                         </Panel>
                     </Button>
+                    <Button Name="RegexNavButton" Classes="nav" Click="OnRegexNavClick" ToolTip.Tip="Regex Tester: try patterns on sample text">
+                        <Panel>
+                            <Border Classes="indicator" />
+                            <StackPanel>
+                                <TextBlock Classes="icon" Text="&#xE773;" />
+                                <TextBlock Classes="label" Text="Regex" />
+                            </StackPanel>
+                        </Panel>
+                    </Button>
                 </StackPanel>
             </DockPanel>
         </Border>
         <Panel Grid.Column="1">
             <jtail:JTailView Name="TailView" />
             <local:TextExpanderView Name="ExpanderView" IsVisible="False" />
+            <local:RegexTesterView Name="RegexView" IsVisible="False" />
         </Panel>
     </Grid>
 </Window>

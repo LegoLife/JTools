@@ -27,6 +27,11 @@
             <SolidColorBrush x:Key="JWarningBackgroundBrush" Color="#2D2715" />
             <SolidColorBrush x:Key="JWarningBorderBrush" Color="#5E4E1B" />
             <SolidColorBrush x:Key="JWarningTextBrush" Color="#E3B341" />
+            <SolidColorBrush x:Key="JErrorTextBrush" Color="#F85149" />
+            <!-- Regex tester: alternating match backgrounds, and the outline around the selected match/group -->
+            <SolidColorBrush x:Key="JMatchBrush" Color="#2E5A3A" />
+            <SolidColorBrush x:Key="JMatchAltBrush" Color="#244A5E" />
+            <SolidColorBrush x:Key="JMatchOutlineBrush" Color="#E3B341" />
             <Color x:Key="JLogBackgroundColor">#141518</Color>
             <Color x:Key="JLogTextColor">#D4D6DA</Color>
             <SolidColorBrush x:Key="JLogBackgroundBrush" Color="#141518" />
@@ -50,6 +55,10 @@
             <SolidColorBrush x:Key="JWarningBackgroundBrush" Color="#FFF8E1" />
             <SolidColorBrush x:Key="JWarningBorderBrush" Color="#E6C65C" />
             <SolidColorBrush x:Key="JWarningTextBrush" Color="#7A5A00" />
+            <SolidColorBrush x:Key="JErrorTextBrush" Color="#CF222E" />
+            <SolidColorBrush x:Key="JMatchBrush" Color="#BFE8CB" />
+            <SolidColorBrush x:Key="JMatchAltBrush" Color="#C5DEF5" />
+            <SolidColorBrush x:Key="JMatchOutlineBrush" Color="#BF8700" />
             <Color x:Key="JLogBackgroundColor">#FFFFFF</Color>
             <Color x:Key="JLogTextColor">#1F2328</Color>
             <SolidColorBrush x:Key="JLogBackgroundBrush" Color="#FFFFFF" />
