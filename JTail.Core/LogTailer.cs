@@ -12,6 +12,9 @@ public sealed class LogTailer
     private readonly string _path;
     private long _position;
 
+    // Keeps a partial character between reads, so one whose bytes arrive in two writes isn't garbled.
+    private readonly Decoder _decoder = Encoding.UTF8.GetDecoder();
+
     private LogTailer(string path, long position)
     {
         _path = path;
@@ -36,14 +39,15 @@ public sealed class LogTailer
         // Skip a UTF-8 byte order mark so it doesn't show up as a stray character.
         var preamble = Encoding.UTF8.Preamble;
         var start = buffer.AsSpan().StartsWith(preamble) ? preamble.Length : 0;
-        initialText = Encoding.UTF8.GetString(buffer, start, buffer.Length - start);
-
-        return new LogTailer(path, length);
+        var tailer = new LogTailer(path, length);
+        initialText = tailer.Decode(buffer, start, buffer.Length - start);
+        return tailer;
     }
 
     /// <summary>
     /// Reads any bytes appended to the file since the last read. Returns null if the file
-    /// was truncated (shorter than before) or if nothing new was appended.
+    /// was truncated (shorter than before) or if nothing new was appended, and an empty string
+    /// if only part of a character has arrived so far.
     /// </summary>
     public string? ReadAppendedText()
     {
@@ -54,6 +58,7 @@ public sealed class LogTailer
         {
             // File was truncated or replaced; out of scope to recover, just resync to current end.
             _position = length;
+            _decoder.Reset();
             return null;
         }
 
@@ -67,7 +72,14 @@ public sealed class LogTailer
         var read = stream.Read(buffer, 0, buffer.Length);
         _position += read;
 
-        return Encoding.UTF8.GetString(buffer, 0, read);
+        return Decode(buffer, 0, read);
+    }
+
+    private string Decode(byte[] bytes, int index, int count)
+    {
+        var chars = new char[Encoding.UTF8.GetMaxCharCount(count)];
+        var decoded = _decoder.GetChars(bytes, index, count, chars, 0, flush: false);
+        return new string(chars, 0, decoded);
     }
 
     private static FileStream OpenShared(string path) => new(

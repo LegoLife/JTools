@@ -28,6 +28,15 @@ Windows SmartScreen may warn you the first time because the exe isn't code-signe
 ## Expand
 
 - Create abbreviations that expand into any text, including multiple lines.
+- Expansions can contain placeholders:
+
+  | Placeholder | Becomes |
+  | --- | --- |
+  | `{date}`, `{time}` | Today's date or the current time, in your Windows format |
+  | `{date:yyyy-MM-dd}`, `{time:HH:mm}` | The same, in a [.NET format](https://learn.microsoft.com/dotnet/standard/base-types/custom-date-and-time-format-strings) of your choice |
+  | `{clipboard}` | The text on the clipboard |
+  | `{cursor}` | Where the caret ends up after expanding (the trigger key isn't typed) |
+  | `{{` | A literal `{` |
 - Choose whether to expand immediately or when you press Space, Tab and/or Enter (**Settings**).
 - Turn expansion on or off with the switch at the top.
 
@@ -64,6 +73,7 @@ Requires the .NET 10 SDK.
 
 ```
 dotnet run --project JTools
+dotnet test JTools.Tests
 dotnet publish JTools/JTools.csproj -c Release -o publish
 ```
 

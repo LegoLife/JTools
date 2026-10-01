@@ -6,35 +6,31 @@ using static TextExpander.NativeMethods;
 namespace TextExpander;
 
 /// <summary>
-/// Watches keystrokes system-wide, tracks the word currently being typed, and swaps an
-/// abbreviation for its expansion either as soon as it's typed or when a trigger key is pressed,
-/// depending on <see cref="AppSettings.Mode"/>.
+/// Watches keystrokes system-wide and feeds the ones that type into a <see cref="TypedWordTracker"/>,
+/// which decides when an abbreviation should be swapped for its expansion.
 /// </summary>
 public sealed class KeyboardHook : IDisposable
 {
     /// <summary>Tags keystrokes we inject so the hook doesn't treat them as user typing.</summary>
     public static readonly IntPtr InjectedMarker = new(0x54455850);
 
-    private const int MaxBufferLength = 64;
     private const int ReinstallIntervalMs = 10000;
 
-    private readonly SnippetStore _store;
-    private readonly AppSettings _settings;
+    private readonly TypedWordTracker _tracker;
     private readonly SynchronizationContext _uiContext;
     private readonly LowLevelKeyboardProc _proc; // held in a field so the GC doesn't collect the callback
-    private readonly StringBuilder _buffer = new();
     private readonly byte[] _keyState = new byte[256];
     private readonly StringBuilder _translated = new(8);
     private readonly Timer _reinstallTimer;
     private IntPtr _hook;
     private IntPtr _lastWindow;
+    private bool _inOwnWindow;
 
     public bool Enabled { get; set; } = true;
 
     public KeyboardHook(SnippetStore store, AppSettings settings)
     {
-        _store = store;
-        _settings = settings;
+        _tracker = new TypedWordTracker(store, settings);
         _uiContext = SynchronizationContext.Current
             ?? throw new InvalidOperationException("KeyboardHook must be created on the UI thread.");
         _proc = HookCallback;
@@ -80,15 +76,21 @@ public sealed class KeyboardHook : IDisposable
     {
         if (!Enabled)
         {
-            _buffer.Clear();
+            _tracker.Reset();
             return false;
         }
 
         var foreground = GetForegroundWindow();
         if (foreground != _lastWindow)
         {
-            _buffer.Clear();
+            _tracker.Reset();
             _lastWindow = foreground;
+            // Don't expand inside our own windows, or you couldn't type abbreviations there.
+            _inOwnWindow = IsOwnWindow(foreground);
+        }
+        if (_inOwnWindow)
+        {
+            return false;
         }
 
         int vk = (int)info.vkCode;
@@ -97,80 +99,40 @@ public sealed class KeyboardHook : IDisposable
 
         if (IsDown(VK_CONTROL) || IsDown(VK_MENU) || IsDown(VK_LWIN) || IsDown(VK_RWIN))
         {
-            _buffer.Clear();
+            _tracker.Reset();
             return false;
         }
 
+        Replacement? replacement;
         switch (vk)
         {
             case VK_BACK:
-                if (_buffer.Length > 0) _buffer.Length--;
+                _tracker.Backspace();
                 return false;
             case VK_SPACE:
             case VK_TAB:
             case VK_RETURN:
-                if (_settings.Mode == ExpandMode.TriggerKey && _settings.IsTriggerKey(vk))
-                    return TryExpandOnTrigger((ushort)vk, foreground);
-                _buffer.Clear(); // whitespace ends the word
-                return false;
+                replacement = _tracker.WordEnded((ushort)vk);
+                break;
+            default:
+                string typed = Translate(info, foreground);
+                if (typed.Length == 0)
+                {
+                    // Arrows, Home/End, Delete, F-keys, etc. move the caret, so the word no longer
+                    // reflects what's in front of it.
+                    _tracker.Reset();
+                    return false;
+                }
+                replacement = _tracker.Typed(typed);
+                break;
         }
 
-        string typed = Translate(info, foreground);
-        if (typed.Length == 0)
-        {
-            // Arrows, Home/End, Delete, F-keys, etc. move the caret, so the buffer no longer
-            // reflects what's in front of it.
-            _buffer.Clear();
-            return false;
-        }
-
-        _buffer.Append(typed);
-        if (_buffer.Length > MaxBufferLength)
-            _buffer.Remove(0, _buffer.Length - MaxBufferLength);
-
-        if (_settings.Mode == ExpandMode.Immediate)
-            return TryExpandImmediately(typed.Length, foreground);
-        return false;
-    }
-
-    private bool TryExpandOnTrigger(ushort triggerVk, IntPtr foreground)
-    {
-        var snippet = FindMatch(foreground);
-        _buffer.Clear();
-        if (snippet is null)
+        if (replacement is null)
             return false;
 
-        // The trigger key is swallowed, so everything typed so far is on screen.
-        ushort? trailingKey = _settings.KeepTriggerKey ? triggerVk : null;
-        PostReplace(snippet.Abbreviation.Length, snippet.Expansion, trailingKey);
-        return true;
-    }
-
-    private bool TryExpandImmediately(int lastKeyLength, IntPtr foreground)
-    {
-        var snippet = FindMatch(foreground);
-        if (snippet is null)
-            return false;
-
-        _buffer.Clear();
-        // The keystroke that completed the abbreviation is swallowed, so it never reaches the screen.
-        int onScreen = Math.Max(0, snippet.Abbreviation.Length - lastKeyLength);
-        PostReplace(onScreen, snippet.Expansion, null);
-        return true;
-    }
-
-    private Snippet? FindMatch(IntPtr foreground)
-    {
-        // Don't expand inside our own windows, or you couldn't type abbreviations there.
-        if (_buffer.Length == 0 || IsOwnWindow(foreground))
-            return null;
-        return _store.FindMatch(_buffer.ToString());
-    }
-
-    private void PostReplace(int backspaces, string expansion, ushort? trailingKey)
-    {
         // Do the injection after the hook returns; hooks that take too long get removed by Windows.
-        _uiContext.Post(_ => TextSender.Replace(backspaces, expansion, trailingKey), null);
+        _uiContext.Post(_ => TextSender.Replace(replacement), null);
+        return true;
     }
 
     private string Translate(KBDLLHOOKSTRUCT info, IntPtr foreground)

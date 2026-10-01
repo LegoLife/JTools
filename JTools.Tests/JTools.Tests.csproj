@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!-- Unit tests for the logic that needs neither Windows nor a UI: abbreviation matching, the typed-word
+         tracker, snippet placeholders, regex runs and log tailing. -->
+    <PropertyGroup>
+        <TargetFramework>net10.0-windows</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <IsPackable>false</IsPackable>
+        <!-- JTools is a self-contained exe outside Debug; the tests only use its classes. -->
+        <ValidateExecutableReferencesMatchSelfContained>false</ValidateExecutableReferencesMatchSelfContained>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+        <PackageReference Include="xunit" Version="2.9.3" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="Xunit" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\JTools\JTools.csproj" />
+        <ProjectReference Include="..\JTail.Core\JTail.Core.csproj" />
+        <ProjectReference Include="..\TextExpander.Core\TextExpander.Core.csproj" />
+    </ItemGroup>
+
+</Project>

@@ -91,7 +91,7 @@ public partial class TextExpanderView : UserControl
             ? "Type an abbreviation in any app and it expands immediately."
             : $"Type an abbreviation in any app, then press {settings.DescribeTriggerKeys()} to expand it.";
         HintText.Text = howToExpand + " Abbreviations are case-sensitive and can't contain spaces. " +
-                        "Expansion is paused while JTools is the active window.";
+                        "Expansion is paused while JTools is the active window.\n" + SnippetTemplate.Help;
     }
 
     private void RefreshList(Snippet? select)

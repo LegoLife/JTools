@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
 using static TextExpander.NativeMethods;
@@ -23,23 +24,25 @@ internal static class TextSender
     private const int ChordHoldMs = 50;
 
     /// <summary>
-    /// Deletes the typed abbreviation, pastes the expansion, then optionally presses
-    /// <paramref name="trailingVk"/> (the trigger key, when the user wants to keep it).
+    /// Deletes the typed abbreviation, pastes the expansion with its placeholders filled in, then
+    /// either moves the caret back to <c>{cursor}</c> or presses the trailing key (the trigger key,
+    /// when the user wants to keep it).
     /// </summary>
     /// <remarks>
     /// Pasting is used instead of typing the expansion one keystroke at a time because typed
     /// newlines become Enter presses (which send messages in chat apps) and long text gets
     /// dropped or garbled by apps that can't keep up with a burst of injected keystrokes.
     /// </remarks>
-    public static async void Replace(int backspaces, string expansion, ushort? trailingVk)
+    public static async void Replace(Replacement replacement)
     {
         var saved = SnapshotClipboard();
-        if (!TrySetClipboard(CreateTextData(expansion.ReplaceLineEndings("\r\n"))))
+        var (text, caretStepsBack) = SnippetTemplate.Render(replacement.Text, DateTime.Now, TextIn(saved), CultureInfo.CurrentCulture);
+        if (!TrySetClipboard(CreateTextData(text.ReplaceLineEndings("\r\n"))))
             return; // Clipboard is locked by another app; leave the abbreviation as typed.
         await Task.Delay(TriggerSettleMs);
 
         var erase = new List<INPUT>();
-        for (int i = 0; i < backspaces; i++)
+        for (int i = 0; i < replacement.Backspaces; i++)
             AddKey(erase, VK_BACK);
         ReleaseHeldModifiers(erase);
         Send(erase);
@@ -52,7 +55,16 @@ internal static class TextSender
         await Task.Delay(ChordHoldMs);
         Send([Keyboard('V', KEYEVENTF_KEYUP), Keyboard(VK_CONTROL, KEYEVENTF_KEYUP)]);
 
-        if (trailingVk is { } vk)
+        // With {cursor} the trigger key is dropped: it would land at the end of the text, not at the caret.
+        if (caretStepsBack is { } steps)
+        {
+            await Task.Delay(KeyDelayMs);
+            var left = new List<INPUT>();
+            for (int i = 0; i < steps; i++)
+                AddKey(left, VK_LEFT);
+            Send(left);
+        }
+        else if (replacement.TrailingKey is { } vk)
         {
             await Task.Delay(KeyDelayMs);
             var trailing = new List<INPUT>();
@@ -122,6 +134,17 @@ internal static class TextSender
         >= CF_GDIOBJFIRST and <= CF_GDIOBJLAST => false,
         _ => true,
     };
+
+    /// <summary>The text in a clipboard snapshot, or null if it has none.</summary>
+    private static string? TextIn(List<ClipboardItem>? items)
+    {
+        var item = items?.FirstOrDefault(i => i.Format == CF_UNICODETEXT);
+        if (item is null)
+            return null;
+        var text = Encoding.Unicode.GetString(item.Data);
+        int end = text.IndexOf('\0');
+        return end < 0 ? text : text[..end];
+    }
 
     /// <summary>Copies every format currently on the clipboard so it can be put back afterwards.</summary>
     private static List<ClipboardItem>? SnapshotClipboard()
