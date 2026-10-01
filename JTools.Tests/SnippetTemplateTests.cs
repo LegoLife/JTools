@@ -7,8 +7,16 @@ public class SnippetTemplateTests
 {
     private static readonly DateTime Now = new(2026, 10, 1, 14, 5, 9);
 
-    private static RenderedSnippet Render(string template, string? clipboard = null, CultureInfo? culture = null) =>
-        SnippetTemplate.Render(template, Now, clipboard, culture ?? CultureInfo.InvariantCulture);
+    /// <summary>The whole text of an expansion that has no fields, and where its caret goes.</summary>
+    private readonly record struct RenderedSnippet(string Text, int? CaretStepsBack);
+
+    private static RenderedSnippet Render(string template, string? clipboard = null, CultureInfo? culture = null)
+    {
+        var expansion = SnippetTemplate.Render(template, Now, clipboard, culture ?? CultureInfo.InvariantCulture);
+        var text = expansion.Continue();
+        Assert.True(expansion.IsComplete);
+        return new RenderedSnippet(text, expansion.CaretStepsBack);
+    }
 
     [Fact]
     public void Leaves_text_without_placeholders_alone()

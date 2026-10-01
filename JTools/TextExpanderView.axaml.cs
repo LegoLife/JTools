@@ -43,6 +43,16 @@ public partial class TextExpanderView : UserControl
         SnippetList.SelectionChanged += OnSelectionChanged;
         AbbreviationBox.TextChanged += (_, _) => ClearStatus();
         ExpansionBox.TextChanged += (_, _) => ClearStatus();
+        TryBox.GotFocus += (_, _) => SetExpandInTryBox(true);
+        TryBox.LostFocus += (_, _) => SetExpandInTryBox(false);
+    }
+
+    private void SetExpandInTryBox(bool on)
+    {
+        if (_expander is not null)
+        {
+            _expander.ExpandInOwnWindow = on;
+        }
     }
 
     public void Attach(ExpanderHost expander)
@@ -91,7 +101,7 @@ public partial class TextExpanderView : UserControl
             ? "Type an abbreviation in any app and it expands immediately."
             : $"Type an abbreviation in any app, then press {settings.DescribeTriggerKeys()} to expand it.";
         HintText.Text = howToExpand + " Abbreviations are case-sensitive and can't contain spaces. " +
-                        "Expansion is paused while JTools is the active window.\n" + SnippetTemplate.Help;
+                        "Expansion is paused while JTools is the active window, except in Try it.\n" + SnippetTemplate.Help;
     }
 
     private void RefreshList(Snippet? select)

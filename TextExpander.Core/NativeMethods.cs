@@ -10,6 +10,7 @@ internal static class NativeMethods
     public const int WM_SYSKEYDOWN = 0x0104;
 
     public const uint INPUT_KEYBOARD = 1;
+    public const uint KEYEVENTF_EXTENDEDKEY = 0x0001;
     public const uint KEYEVENTF_KEYUP = 0x0002;
     public const uint KEYEVENTF_UNICODE = 0x0004;
 
@@ -20,8 +21,13 @@ internal static class NativeMethods
     public const int VK_CONTROL = 0x11;
     public const int VK_MENU = 0x12;
     public const int VK_CAPITAL = 0x14;
+    public const int VK_ESCAPE = 0x1B;
     public const int VK_SPACE = 0x20;
+    public const int VK_END = 0x23;
+    public const int VK_HOME = 0x24;
     public const int VK_LEFT = 0x25;
+    public const int VK_RIGHT = 0x27;
+    public const int VK_DELETE = 0x2E;
     public const int VK_LWIN = 0x5B;
     public const int VK_RWIN = 0x5C;
     public const int VK_LSHIFT = 0xA0;

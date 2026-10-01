@@ -39,7 +39,9 @@ Windows SmartScreen may warn you the first time because the exe isn't code-signe
   | `{date:yyyy-MM-dd}`, `{time:HH:mm}` | The same, in a [.NET format](https://learn.microsoft.com/dotnet/standard/base-types/custom-date-and-time-format-strings) of your choice |
   | `{clipboard}` | The text on the clipboard |
   | `{cursor}` | Where the caret ends up after expanding (the trigger key isn't typed) |
+  | `{input:name}` | A fill-in. Expansion stops here with `name` selected; type a value and press Tab or Enter to continue, or Esc to stop. Later `{input:name}`s in the same expansion repeat the value. A bare `{input}` asks every time |
   | `{{` | A literal `{` |
+- Test your abbreviations in the **Try it** box under the editor. Expansion is otherwise paused while JTools is the active window.
 - Choose whether to expand immediately or when you press Space, Tab and/or Enter (**Settings**).
 - Turn expansion on or off with the switch at the top.
 

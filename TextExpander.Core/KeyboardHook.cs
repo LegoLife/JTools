@@ -25,8 +25,38 @@ public sealed class KeyboardHook : IDisposable
     private IntPtr _hook;
     private IntPtr _lastWindow;
     private bool _inOwnWindow;
+    private bool _enabled = true;
 
-    public bool Enabled { get; set; } = true;
+    /// <summary>The field an expansion is waiting at, which gets the keystrokes instead of the tracker.</summary>
+    private FieldInput? _field;
+    private TaskCompletionSource<bool>? _fieldDone;
+
+    private bool _expandInOwnWindow;
+
+    public bool Enabled
+    {
+        get => _enabled;
+        set
+        {
+            _enabled = value;
+            if (!value)
+                EndField(false);
+        }
+    }
+
+    /// <summary>
+    /// Expands in this process's windows too, which is normally off so abbreviations can be typed in the editor.
+    /// Changing it forgets the word being typed and stops waiting at a field.
+    /// </summary>
+    public bool ExpandInOwnWindow
+    {
+        get => _expandInOwnWindow;
+        set
+        {
+            _expandInOwnWindow = value;
+            EndField(false);
+        }
+    }
 
     public KeyboardHook(SnippetStore store, AppSettings settings)
     {
@@ -60,6 +90,32 @@ public sealed class KeyboardHook : IDisposable
         _hook = fresh;
     }
 
+    /// <summary>
+    /// Sends the keystrokes the user types to <paramref name="field"/> until they press Tab or Enter
+    /// (both swallowed), which finishes it.
+    /// </summary>
+    /// <returns>
+    /// A task that completes with true when the field is finished, or false if it's cancelled by Esc,
+    /// another window getting focus, or expansion being turned off.
+    /// </returns>
+    internal Task<bool> WaitForField(FieldInput field)
+    {
+        EndField(false);
+        _field = field;
+        // The caller continues on the UI thread after the hook returns, not inside it.
+        _fieldDone = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        return _fieldDone.Task;
+    }
+
+    private void EndField(bool finished)
+    {
+        var done = _fieldDone;
+        _field = null;
+        _fieldDone = null;
+        _tracker.Reset();
+        done?.SetResult(finished);
+    }
+
     private IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
     {
         if (nCode >= 0 && (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN))
@@ -83,12 +139,13 @@ public sealed class KeyboardHook : IDisposable
         var foreground = GetForegroundWindow();
         if (foreground != _lastWindow)
         {
+            EndField(false);
             _tracker.Reset();
             _lastWindow = foreground;
             // Don't expand inside our own windows, or you couldn't type abbreviations there.
             _inOwnWindow = IsOwnWindow(foreground);
         }
-        if (_inOwnWindow)
+        if (_inOwnWindow && !ExpandInOwnWindow)
         {
             return false;
         }
@@ -96,6 +153,9 @@ public sealed class KeyboardHook : IDisposable
         int vk = (int)info.vkCode;
         if (IsModifier(vk))
             return false;
+
+        if (_field is not null)
+            return HandleFieldKey(info, foreground, _field);
 
         if (IsDown(VK_CONTROL) || IsDown(VK_MENU) || IsDown(VK_LWIN) || IsDown(VK_RWIN))
         {
@@ -131,8 +191,55 @@ public sealed class KeyboardHook : IDisposable
             return false;
 
         // Do the injection after the hook returns; hooks that take too long get removed by Windows.
-        _uiContext.Post(_ => TextSender.Replace(replacement), null);
+        _uiContext.Post(_ => TextSender.Replace(replacement, this), null);
         return true;
+    }
+
+    /// <returns>true if the keystroke should be swallowed.</returns>
+    private bool HandleFieldKey(KBDLLHOOKSTRUCT info, IntPtr foreground, FieldInput field)
+    {
+        int vk = (int)info.vkCode;
+        if (IsDown(VK_CONTROL) || IsDown(VK_MENU) || IsDown(VK_LWIN) || IsDown(VK_RWIN))
+        {
+            if (vk == 'V' && IsDown(VK_CONTROL) && !IsDown(VK_MENU))
+                field.Type(TextSender.ClipboardText() ?? "");
+            return false;
+        }
+
+        switch (vk)
+        {
+            case VK_TAB:
+            case VK_RETURN:
+                EndField(true);
+                return true;
+            case VK_ESCAPE:
+                EndField(false);
+                return true;
+            case VK_BACK:
+                field.Backspace();
+                break;
+            case VK_DELETE:
+                field.Delete();
+                break;
+            case VK_LEFT:
+                field.Left();
+                break;
+            case VK_RIGHT:
+                field.Right();
+                break;
+            case VK_HOME:
+                field.Home();
+                break;
+            case VK_END:
+                field.End();
+                break;
+            default:
+                string typed = Translate(info, foreground);
+                if (typed.Length > 0)
+                    field.Type(typed);
+                break;
+        }
+        return false;
     }
 
     private string Translate(KBDLLHOOKSTRUCT info, IntPtr foreground)
@@ -166,6 +273,7 @@ public sealed class KeyboardHook : IDisposable
 
     public void Dispose()
     {
+        EndField(false);
         _reinstallTimer.Dispose();
         if (_hook != IntPtr.Zero)
         {

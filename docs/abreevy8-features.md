@@ -81,7 +81,7 @@ The editor's blue-arrow menu inserts these, and the help pages document them.
 
 | Macro | What it does | JTools |
 | --- | --- | --- |
-| `%(input id)` / `%(fill id)` | Inline fill-in with reusable variables (see above) | No |
+| `%(input id)` / `%(fill id)` | Inline fill-in with reusable variables (see above) | Yes (`{input:name}`, also finished by Enter) |
 | `%(clipboard)` | Inserts the clipboard text | Yes (`{clipboard}`) |
 | `%(cursor)` | Leaves the caret here after expanding | Yes (`{cursor}`) |
 | Date and time parts | `%(Year)`, `%(YearShort)`, `%(Month)`, `%(MonthName)`, `%(MonthNameShort)`, `%(Day)`, `%(WeekdayName)`, `%(WeekdayNameShort)`, `%(DayOfWeek)`, `%(DayOfWeekMon)`, `%(DayOfYear)`, `%(WeekOfYear)`, `%(Hour)`, `%(Hour24)`, `%(Minute)`, `%(Second)`, `%(AMorPM)`; a `#` prefix (`%(#Day)`) drops leading zeros | Yes, through .NET formats (`{date:dddd, MMMM d}`); week of year and day of year have no .NET format code |

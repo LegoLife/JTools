@@ -29,14 +29,22 @@ internal static class TextSender
     /// when the user wants to keep it).
     /// </summary>
     /// <remarks>
+    /// <para>
     /// Pasting is used instead of typing the expansion one keystroke at a time because typed
     /// newlines become Enter presses (which send messages in chat apps) and long text gets
     /// dropped or garbled by apps that can't keep up with a burst of injected keystrokes.
+    /// </para>
+    /// <para>
+    /// At each <c>{input}</c> the field's label is pasted and selected, and the rest waits until
+    /// <paramref name="hook"/> sees the user press Tab or Enter after typing the value. The user's
+    /// clipboard is put back while they type, so they can paste into the field.
+    /// </para>
     /// </remarks>
-    public static async void Replace(Replacement replacement)
+    public static async void Replace(Replacement replacement, KeyboardHook hook)
     {
         var saved = SnapshotClipboard();
-        var (text, caretStepsBack) = SnippetTemplate.Render(replacement.Text, DateTime.Now, TextIn(saved), CultureInfo.CurrentCulture);
+        var expansion = SnippetTemplate.Render(replacement.Text, DateTime.Now, TextIn(saved), CultureInfo.CurrentCulture);
+        var text = expansion.Continue() + expansion.WaitingAt?.Label;
         if (!TrySetClipboard(CreateTextData(text.ReplaceLineEndings("\r\n"))))
             return; // Clipboard is locked by another app; leave the abbreviation as typed.
         await Task.Delay(TriggerSettleMs);
@@ -44,19 +52,41 @@ internal static class TextSender
         var erase = new List<INPUT>();
         for (int i = 0; i < replacement.Backspaces; i++)
             AddKey(erase, VK_BACK);
-        ReleaseHeldModifiers(erase);
         Send(erase);
         await Task.Delay(KeyDelayMs);
+        await Paste();
 
-        // Hold Ctrl+V down briefly. If the whole chord is sent in one burst, apps that check the
-        // live Ctrl state when handling V (e.g. Windows 11 Notepad) see Ctrl already released
-        // and type a plain "v" instead of pasting.
-        Send([Keyboard(VK_CONTROL, 0), Keyboard('V', 0)]);
-        await Task.Delay(ChordHoldMs);
-        Send([Keyboard('V', KEYEVENTF_KEYUP), Keyboard(VK_CONTROL, KEYEVENTF_KEYUP)]);
+        while (expansion.WaitingAt is { } field)
+        {
+            await Task.Delay(KeyDelayMs);
+            await SelectBack(new StringInfo(field.Label).LengthInTextElements);
+            var input = new FieldInput(field.Label);
+            var typed = hook.WaitForField(input);
+
+            await Task.Delay(ClipboardRestoreDelayMs);
+            if (saved is not null)
+                TrySetClipboard(saved);
+            saved = null; // already put back
+            if (!await typed)
+                return; // cancelled; leave what's been output so far
+
+            expansion.Fill(input.Value);
+            text = expansion.Continue() + expansion.WaitingAt?.Label;
+
+            MoveRight(input.StepsToEnd);
+            if (text.Length == 0)
+                continue;
+
+            // The user may have copied something while typing.
+            saved = SnapshotClipboard();
+            if (!TrySetClipboard(CreateTextData(text.ReplaceLineEndings("\r\n"))))
+                return;
+            await Task.Delay(KeyDelayMs);
+            await Paste();
+        }
 
         // With {cursor} the trigger key is dropped: it would land at the end of the text, not at the caret.
-        if (caretStepsBack is { } steps)
+        if (expansion.CaretStepsBack is { } steps)
         {
             await Task.Delay(KeyDelayMs);
             var left = new List<INPUT>();
@@ -75,6 +105,69 @@ internal static class TextSender
         await Task.Delay(ClipboardRestoreDelayMs);
         if (saved is not null)
             TrySetClipboard(saved);
+    }
+
+    private static async Task Paste()
+    {
+        var release = new List<INPUT>();
+        ReleaseHeldModifiers(release);
+        Send(release);
+
+        // Hold Ctrl+V down briefly. If the whole chord is sent in one burst, apps that check the
+        // live Ctrl state when handling V (e.g. Windows 11 Notepad) see Ctrl already released
+        // and type a plain "v" instead of pasting.
+        Send([Keyboard(VK_CONTROL, 0), Keyboard('V', 0)]);
+        await Task.Delay(ChordHoldMs);
+        Send([Keyboard('V', KEYEVENTF_KEYUP), Keyboard(VK_CONTROL, KEYEVENTF_KEYUP)]);
+    }
+
+    /// <summary>Selects the <paramref name="count"/> characters before the caret with Shift+Left.</summary>
+    /// <remarks>Shift is held around the presses, like Ctrl in <see cref="Paste"/>, for apps that check its live state.</remarks>
+    private static async Task SelectBack(int count)
+    {
+        Send([Keyboard(VK_SHIFT, 0)]);
+        await Task.Delay(ChordHoldMs);
+        var left = new List<INPUT>();
+        for (int i = 0; i < count; i++)
+            AddKey(left, VK_LEFT);
+        Send(left);
+        await Task.Delay(ChordHoldMs);
+        Send([Keyboard(VK_SHIFT, KEYEVENTF_KEYUP)]);
+    }
+
+    private static void MoveRight(int count)
+    {
+        var right = new List<INPUT>();
+        for (int i = 0; i < count; i++)
+            AddKey(right, VK_RIGHT);
+        Send(right);
+    }
+
+    /// <summary>The text on the clipboard, or null if there's none or another app has the clipboard open.</summary>
+    /// <remarks>Doesn't wait for the clipboard, so it's quick enough to call from the keyboard hook.</remarks>
+    internal static string? ClipboardText()
+    {
+        if (!OpenClipboard(IntPtr.Zero))
+            return null;
+        try
+        {
+            var handle = GetClipboardData(CF_UNICODETEXT);
+            var data = handle == IntPtr.Zero ? IntPtr.Zero : GlobalLock(handle);
+            if (data == IntPtr.Zero)
+                return null;
+            try
+            {
+                return Marshal.PtrToStringUni(data);
+            }
+            finally
+            {
+                GlobalUnlock(handle);
+            }
+        }
+        finally
+        {
+            CloseClipboard();
+        }
     }
 
     /// <summary>
@@ -221,7 +314,10 @@ internal static class TextSender
     }
 
     /// <remarks>
-    /// Includes the hardware scan code, which some apps read instead of the virtual-key code.
+    /// Includes the hardware scan code, which some apps read instead of the virtual-key code. The
+    /// arrow keys, Home, End and Delete are marked as extended keys; otherwise their scan codes are
+    /// the numpad's, and with Num Lock on Windows releases Shift around them, so Shift+Left moves
+    /// the caret instead of selecting.
     /// </remarks>
     private static INPUT Keyboard(int vk, uint flags) => new()
     {
@@ -232,7 +328,9 @@ internal static class TextSender
             {
                 wVk = (ushort)vk,
                 wScan = (ushort)MapVirtualKey((uint)vk, MAPVK_VK_TO_VSC),
-                dwFlags = flags,
+                dwFlags = vk is VK_LEFT or VK_RIGHT or VK_HOME or VK_END or VK_DELETE
+                    ? flags | KEYEVENTF_EXTENDEDKEY
+                    : flags,
                 dwExtraInfo = KeyboardHook.InjectedMarker,
             },
         },

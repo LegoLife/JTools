@@ -3,25 +3,35 @@ using System.Text;
 
 namespace TextExpander;
 
-/// <summary>An expansion with its placeholders filled in.</summary>
-/// <param name="CaretStepsBack">
-/// How many times to press Left after pasting to put the caret where <c>{cursor}</c> was, or null if there was none.
-/// </param>
-public readonly record struct RenderedSnippet(string Text, int? CaretStepsBack);
-
 /// <summary>
 /// Fills in the placeholders in an expansion: <c>{date}</c>, <c>{time}</c> (both optionally with a .NET format,
-/// e.g. <c>{date:yyyy-MM-dd}</c>), <c>{clipboard}</c> and <c>{cursor}</c>. <c>{{</c> is a literal brace, and
-/// anything else in braces is kept as typed.
+/// e.g. <c>{date:yyyy-MM-dd}</c>), <c>{clipboard}</c>, <c>{cursor}</c> and <c>{input}</c> / <c>{input:name}</c>.
+/// <c>{{</c> is a literal brace, and anything else in braces is kept as typed.
 /// </summary>
 public static class SnippetTemplate
 {
-    public const string Help = "Placeholders: {date}, {time}, {date:yyyy-MM-dd}, {clipboard}, {cursor}. Type {{ for a literal {.";
+    public const string Help = "Placeholders: {date}, {time}, {date:yyyy-MM-dd}, {clipboard}, {cursor}, " +
+                               "{input:name} (type a value, then press Tab; later {input:name}s repeat it). " +
+                               "Type {{ for a literal {.";
 
-    public static RenderedSnippet Render(string template, DateTime now, string? clipboardText, CultureInfo culture)
+    /// <summary>
+    /// Fills in every placeholder except <c>{cursor}</c> and <c>{input}</c>, which become places in an
+    /// <see cref="Expansion"/> that's output a piece at a time.
+    /// </summary>
+    public static Expansion Render(string template, DateTime now, string? clipboardText, CultureInfo culture)
     {
+        var parts = new List<object>();
         var text = new StringBuilder(template.Length);
-        int? cursorAt = null;
+
+        void Add(object part)
+        {
+            if (text.Length > 0)
+            {
+                parts.Add(text.ToString());
+                text.Clear();
+            }
+            parts.Add(part);
+        }
 
         int i = 0;
         while (i < template.Length)
@@ -43,8 +53,12 @@ public static class SnippetTemplate
             var token = close < 0 ? "" : template[(i + 1)..close];
             if (token.Equals("cursor", StringComparison.OrdinalIgnoreCase))
             {
-                // Only the first one can be where the caret goes; later ones just disappear.
-                cursorAt ??= text.Length;
+                Add(Expansion.Cursor);
+                i = close + 1;
+            }
+            else if (close >= 0 && TryParseField(token) is { } field)
+            {
+                Add(field);
                 i = close + 1;
             }
             else if (close >= 0 && TryResolve(token, now, clipboardText, culture) is { } value)
@@ -59,9 +73,25 @@ public static class SnippetTemplate
             }
         }
 
-        // Left moves over a whole character as the user sees it, so "\r\n" or an emoji is one step.
-        int? steps = cursorAt is { } at ? new StringInfo(text.ToString(at, text.Length - at)).LengthInTextElements : null;
-        return new RenderedSnippet(text.ToString(), steps);
+        if (text.Length > 0)
+        {
+            parts.Add(text.ToString());
+        }
+        return new Expansion(parts);
+    }
+
+    /// <returns>The field <paramref name="token"/> asks for, or null if it isn't <c>input</c> or <c>input:name</c>.</returns>
+    private static Field? TryParseField(string token)
+    {
+        int colon = token.IndexOf(':');
+        var name = colon < 0 ? token : token[..colon];
+        if (!name.Equals("input", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        var id = colon < 0 ? "" : token[(colon + 1)..].Trim();
+        return new Field(id.Length > 0 ? id : null);
     }
 
     /// <returns>The placeholder's value, or null if <paramref name="token"/> isn't a placeholder.</returns>

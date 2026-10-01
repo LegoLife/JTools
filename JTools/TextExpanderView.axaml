@@ -91,13 +91,18 @@
                                        Margin="0,0,16,0" />
                         </DockPanel>
                     </Border>
-                    <Grid Margin="16" RowDefinitions="Auto,Auto,Auto,*">
+                    <Grid Margin="16" RowDefinitions="Auto,Auto,Auto,*,Auto,Auto">
                         <TextBlock Grid.Row="0" Classes="fieldLabel" Text="Abbreviation" />
                         <TextBox Grid.Row="1" Name="AbbreviationBox" Classes="code" Margin="0,0,0,16"
                                  Watermark="e.g. ;sig" MaxWidth="360" HorizontalAlignment="Left" MinWidth="240" />
                         <TextBlock Grid.Row="2" Classes="fieldLabel" Text="Expands to" />
                         <TextBox Grid.Row="3" Name="ExpansionBox" AcceptsReturn="True" AcceptsTab="True"
                                  TextWrapping="Wrap" VerticalContentAlignment="Top" />
+                        <TextBlock Grid.Row="4" Classes="fieldLabel" Text="Try it" Margin="0,16,0,0" />
+                        <!-- Saved abbreviations expand here, though expansion is otherwise paused in JTools -->
+                        <TextBox Grid.Row="5" Name="TryBox" AcceptsReturn="True" AcceptsTab="True" TextWrapping="Wrap"
+                                 VerticalContentAlignment="Top" Height="96"
+                                 Watermark="Type a saved abbreviation here to see it expand" />
                     </Grid>
                 </DockPanel>
             </Border>

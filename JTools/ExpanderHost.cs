@@ -38,6 +38,19 @@ public sealed class ExpanderHost : IDisposable
         }
     }
 
+    /// <summary>Lets abbreviations expand in JTools' own window, e.g. while the Expand tool's Try it box has focus.</summary>
+    public bool ExpandInOwnWindow
+    {
+        get => _hook?.ExpandInOwnWindow ?? false;
+        set
+        {
+            if (_hook is not null)
+            {
+                _hook.ExpandInOwnWindow = value;
+            }
+        }
+    }
+
     public event Action? EnabledChanged;
 
     /// <summary>Raised when <see cref="IsStarted"/> or <see cref="IsAvailable"/> changes.</summary>
