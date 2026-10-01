@@ -9,7 +9,7 @@ namespace JTools;
 
 /// <summary>
 /// Runs from the system tray: closing the window only hides it, so text expansion keeps working.
-/// The app exits from the tray menu or JTail's File → Exit.
+/// Ctrl+Alt+J shows or hides the window from any app. The app exits from the tray menu or JTail's File → Exit.
 /// </summary>
 public partial class App : Application
 {
@@ -19,6 +19,7 @@ public partial class App : Application
     private IClassicDesktopStyleApplicationLifetime? _desktop;
     private ExpanderHost? _expander;
     private MainWindow? _window;
+    private GlobalHotkey? _hotkey;
     private TrayIcon? _trayIcon;
 
     public override void Initialize()
@@ -38,6 +39,7 @@ public partial class App : Application
             _window = new MainWindow();
             _window.Attach(_settings, _expander);
             _window.ExitRequested += (_, _) => Exit();
+            _hotkey = GlobalHotkey.TryRegister(_window, ToggleMainWindow);
 
             CreateTrayIcon(_expander);
 
@@ -53,7 +55,7 @@ public partial class App : Application
 
     private void CreateTrayIcon(ExpanderHost expander)
     {
-        var openItem = new NativeMenuItem("Open JTools");
+        var openItem = new NativeMenuItem("Open JTools") { Gesture = _hotkey is null ? null : GlobalHotkey.Gesture };
         openItem.Click += (_, _) => ShowMainWindow();
 
         var expansionItem = new NativeMenuItem("Text expansion enabled")
@@ -87,6 +89,13 @@ public partial class App : Application
             exitItem,
         };
 
+        // Say why the shortcut does nothing, where someone would look for it.
+        var hotkeyTaken = $"{GlobalHotkey.Gesture} is in use by another app";
+        if (_hotkey is null)
+        {
+            menu.Items.Insert(1, new NativeMenuItem(hotkeyTaken) { IsEnabled = false });
+        }
+
         // The expansion switch only means something while the Expand tool is turned on.
         void UpdateExpansionItem()
         {
@@ -108,7 +117,7 @@ public partial class App : Application
         _trayIcon = new TrayIcon
         {
             Icon = new WindowIcon(AssetLoader.Open(new Uri("avares://JTools/Assets/icon.ico"))),
-            ToolTipText = "JTools",
+            ToolTipText = _hotkey is null ? $"JTools ({hotkeyTaken})" : $"JTools ({GlobalHotkey.Gesture})",
             Menu = menu,
         };
         _trayIcon.Clicked += (_, _) => ShowMainWindow();
@@ -130,8 +139,24 @@ public partial class App : Application
         _window.Activate();
     }
 
+    /// <summary>
+    /// The global hotkey: hides the window if it's in front, otherwise shows it and brings it to the front.
+    /// </summary>
+    private void ToggleMainWindow()
+    {
+        if (_window is { IsVisible: true, IsActive: true, WindowState: not WindowState.Minimized })
+        {
+            _window.Hide();
+        }
+        else
+        {
+            ShowMainWindow();
+        }
+    }
+
     private void Exit()
     {
+        _hotkey?.Dispose();
         _window?.CloseForExit();
         _expander?.Dispose();
         _trayIcon?.Dispose();

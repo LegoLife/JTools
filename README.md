@@ -58,6 +58,7 @@ Windows SmartScreen may warn you the first time because the exe isn't code-signe
 - JTools opens on the tool you used last.
 - Dark, Light, or match your Windows setting (**Theme** at the bottom of the side bar).
 - JTools runs from the system tray. Closing the window only hides it, so text expansion keeps working. Quit from the tray menu.
+- Press **Ctrl+Alt+J** in any app to show JTools, or to hide it when it's already in front. If another app already uses that shortcut, the tray menu says so.
 - Optionally **Start with Windows** (tray menu). It starts hidden in the tray.
 
 ![JTail in the light theme](docs/screenshots/tail-light.png)
