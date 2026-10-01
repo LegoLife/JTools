@@ -18,6 +18,9 @@ Windows SmartScreen may warn you the first time because the exe isn't code-signe
 
 - Open log files with **Open**, **Recent**, or by dragging them onto the window. Each file gets its own tab.
 - New lines appear as they're written. **Auto-scroll** follows the end of the file.
+- **Find** (Ctrl+F) highlights text in the log. Enter or F3 goes to the next match, Shift+Enter or Shift+F3 to the previous one.
+- **Filter** (Ctrl+Shift+F) shows only the lines that contain some text, including new lines as they arrive, and says how many lines it hides.
+- Find and filter can match case (**Aa**) or use a .NET regular expression (**.\***). Each tab keeps its own.
 - **Highlights** colors every line that contains a chosen word.
 - **Appearance** sets the log colors and font size. Use the theme's colors, the green-on-black **Matrix** preset, or your own.
 

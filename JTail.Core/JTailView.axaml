@@ -51,6 +51,36 @@
             <Setter Property="Stroke" Value="{DynamicResource JAccentBrush}" />
         </Style>
 
+        <!-- Find and filter bar: the Aa / .* option chips sit inside each box -->
+        <Style Selector="Border.searchBar">
+            <Setter Property="Background" Value="{DynamicResource JChromeBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource JBorderBrush}" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+            <Setter Property="Padding" Value="8,6" />
+        </Style>
+        <Style Selector="Border.searchBar TextBlock.status">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="{DynamicResource JTextDimBrush}" />
+        </Style>
+        <Style Selector="Border.searchBar TextBlock.status.error">
+            <Setter Property="Foreground" Value="{DynamicResource JErrorTextBrush}" />
+        </Style>
+        <Style Selector="ToggleButton.searchOption">
+            <Setter Property="FontFamily" Value="{DynamicResource JMonoFont}" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Width" Value="26" />
+            <Setter Property="Height" Value="22" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0,0,3,0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="TextBox.invalid /template/ Border#PART_BorderElement">
+            <Setter Property="BorderBrush" Value="{DynamicResource JErrorTextBrush}" />
+        </Style>
+
         <Style Selector="Border.statusBar TextBlock">
             <Setter Property="FontSize" Value="12" />
             <Setter Property="VerticalAlignment" Value="Center" />
@@ -114,6 +144,43 @@
                     <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Disabled">
                         <StackPanel Name="TabStrip" Orientation="Horizontal" />
                     </ScrollViewer>
+                </Border>
+                <!-- Find and filter for the selected tab (each tab keeps its own) -->
+                <Border DockPanel.Dock="Top" Classes="searchBar">
+                    <Grid ColumnDefinitions="*,Auto,Auto,Auto,16,*,Auto">
+                        <TextBox Grid.Column="0" Name="FindBox" Watermark="Find (Ctrl+F)" MinWidth="140"
+                                 ToolTip.Tip="Highlight text in the lines shown. Enter or F3 goes to the next match, Shift+Enter or Shift+F3 to the previous one.">
+                            <TextBox.InnerLeftContent>
+                                <TextBlock Classes="icon dim" Text="&#xE721;" Margin="8,0,0,0" />
+                            </TextBox.InnerLeftContent>
+                            <TextBox.InnerRightContent>
+                                <StackPanel Orientation="Horizontal">
+                                    <ToggleButton Name="FindMatchCaseToggle" Classes="searchOption" Content="Aa" ToolTip.Tip="Match case" />
+                                    <ToggleButton Name="FindRegexToggle" Classes="searchOption" Content=".*" ToolTip.Tip="Regular expression" />
+                                </StackPanel>
+                            </TextBox.InnerRightContent>
+                        </TextBox>
+                        <TextBlock Grid.Column="1" Name="FindStatusText" Classes="status" Margin="8,0,4,0" />
+                        <Button Grid.Column="2" Classes="tool" Click="OnFindPreviousClick" ToolTip.Tip="Previous match (Shift+F3)">
+                            <TextBlock Classes="icon" Text="&#xE70E;" />
+                        </Button>
+                        <Button Grid.Column="3" Classes="tool" Click="OnFindNextClick" ToolTip.Tip="Next match (F3)">
+                            <TextBlock Classes="icon" Text="&#xE70D;" />
+                        </Button>
+                        <TextBox Grid.Column="5" Name="FilterBox" Watermark="Filter lines (Ctrl+Shift+F)" MinWidth="140"
+                                 ToolTip.Tip="Show only the lines that contain this text. New lines are filtered as they arrive.">
+                            <TextBox.InnerLeftContent>
+                                <TextBlock Classes="icon dim" Text="&#xE71C;" Margin="8,0,0,0" />
+                            </TextBox.InnerLeftContent>
+                            <TextBox.InnerRightContent>
+                                <StackPanel Orientation="Horizontal">
+                                    <ToggleButton Name="FilterMatchCaseToggle" Classes="searchOption" Content="Aa" ToolTip.Tip="Match case" />
+                                    <ToggleButton Name="FilterRegexToggle" Classes="searchOption" Content=".*" ToolTip.Tip="Regular expression" />
+                                </StackPanel>
+                            </TextBox.InnerRightContent>
+                        </TextBox>
+                        <TextBlock Grid.Column="6" Name="FilterStatusText" Classes="status" Margin="8,0,0,0" />
+                    </Grid>
                 </Border>
                 <Panel Name="TabContentHost" Background="{DynamicResource JLogBackgroundBrush}" />
             </DockPanel>
