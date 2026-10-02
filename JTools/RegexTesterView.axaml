@@ -2,6 +2,7 @@
              xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ae="using:AvaloniaEdit"
+             xmlns:local="using:JTools"
              Background="{DynamicResource JBackgroundBrush}">
     <UserControl.Styles>
         <!-- Pattern and test text editors, framed like the app's TextBoxes -->
@@ -92,7 +93,7 @@
     </UserControl.Styles>
 
     <Grid RowDefinitions="Auto,*">
-        <!-- Header: title, copy as C# -->
+        <!-- Header: title, saved regexes, copy as C# -->
         <Border Grid.Row="0" Classes="toolbar" Padding="20,10,12,10">
             <DockPanel>
                 <Button DockPanel.Dock="Right" Name="CopyCSharpButton" Classes="tool" Click="OnCopyCSharpClick"
@@ -102,6 +103,37 @@
                         <TextBlock Name="CopyCSharpLabel" Text="Copy as C#" />
                     </StackPanel>
                 </Button>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                    <ComboBox Name="LibraryBox" Width="200" VerticalAlignment="Center"
+                              PlaceholderText="Saved regexes" x:DataType="local:SavedRegex"
+                              DisplayMemberBinding="{Binding Name}"
+                              ToolTip.Tip="Load a saved regex: its pattern, test text and options" />
+                    <TextBlock Name="ModifiedMark" Text="•" FontSize="18" Width="14" TextAlignment="Center"
+                               VerticalAlignment="Center" Foreground="{DynamicResource JAccentBrush}"
+                               Opacity="0" ToolTip.Tip="Changed since it was saved" />
+                    <Button Name="SaveRegexButton" Classes="tool" Click="OnSaveRegexClick"
+                            ToolTip.Tip="Save changes to the loaded regex">
+                        <StackPanel>
+                            <TextBlock Classes="icon" Text="&#xE74E;" />
+                            <TextBlock Text="Save" />
+                        </StackPanel>
+                    </Button>
+                    <Button Name="SaveRegexAsButton" Classes="tool" Click="OnSaveRegexAsClick"
+                            ToolTip.Tip="Save the pattern, test text and options under a new name">
+                        <StackPanel>
+                            <TextBlock Classes="icon" Text="&#xE792;" />
+                            <TextBlock Text="Save As…" />
+                        </StackPanel>
+                    </Button>
+                    <Button Name="DeleteRegexButton" Classes="tool" Click="OnDeleteRegexClick"
+                            ToolTip.Tip="Delete the loaded regex from the saved ones">
+                        <StackPanel>
+                            <TextBlock Classes="icon" Text="&#xE74D;" />
+                            <TextBlock Text="Delete" />
+                        </StackPanel>
+                    </Button>
+                    <Separator Classes="toolbarSeparator" />
+                </StackPanel>
                 <TextBlock Classes="title" Text="Regex Tester" VerticalAlignment="Center" />
             </DockPanel>
         </Border>

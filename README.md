@@ -56,12 +56,13 @@ Windows SmartScreen may warn you the first time because the exe isn't code-signe
 - Invalid patterns show the error and underline where it went wrong. Runs stop after 3 seconds, so a runaway pattern can't freeze the app.
 - **Copy as C#** copies `new Regex(@"...", RegexOptions...)`. Right-click the table to copy a cell or the whole table as TSV.
 - Your last pattern, test text and options are remembered.
+- **Save As…** keeps the pattern, its test text and options under a name. Pick a saved regex from the list to load it. A dot beside the list means you've changed it since; **Save** updates it, and **Delete** removes it from the list.
 
 ## Side bar, themes and tray
 
 - **Tools** at the bottom of the side bar turns each tool on or off. A tool that's off is hidden and stops running: Tail closes its files, and Expand stops watching the keyboard. One tool always stays on.
 - JTools opens on the tool you used last.
-- **Data** at the bottom of the side bar exports everything JTools keeps (abbreviations, Expand settings, regexes, Tail highlights and log appearance, and app settings) to one JSON file, and imports it on another PC. Tail's recent files aren't included. Importing replaces your current data: JTools backs it up first to `%APPDATA%\JToolsackups`, then restarts to load the imported data.
+- **Data** at the bottom of the side bar exports everything JTools keeps (abbreviations, Expand settings, saved regexes, Tail highlights and log appearance, and app settings) to one JSON file, and imports it on another PC. Tail's recent files aren't included. Importing replaces your current data: JTools backs it up first to `%APPDATA%\JToolsackups`, then restarts to load the imported data.
 - Dark, Light, or match your Windows setting (**Theme** at the bottom of the side bar).
 - JTools runs from the system tray. Closing the window only hides it, so text expansion keeps working. Quit from the tray menu.
 - Press **Ctrl+Alt+J** in any app to show JTools, or to hide it when it's already in front. If another app already uses that shortcut, the tray menu says so.

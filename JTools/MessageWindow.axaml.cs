@@ -3,7 +3,7 @@ using Avalonia.Interactivity;
 
 namespace JTools;
 
-/// <summary>A message, or a question to confirm, shown over a window.</summary>
+/// <summary>A message, a question to confirm, or a prompt for some text, shown over a window.</summary>
 public partial class MessageWindow : Window
 {
     public MessageWindow()
@@ -26,6 +26,27 @@ public partial class MessageWindow : Window
         var window = Create(title, message);
         window.OkButton.Content = okText;
         return window.ShowDialog<bool>(owner);
+    }
+
+    /// <summary>
+    /// Asks for some text, starting with <paramref name="text"/>; the trimmed text, or null if the user
+    /// cancelled. OK is only enabled while there's text.
+    /// </summary>
+    public static async Task<string?> AskText(Window owner, string title, string message, string text, string okText)
+    {
+        var window = Create(title, message);
+        window.OkButton.Content = okText;
+        window.InputBox.IsVisible = true;
+        window.InputBox.Text = text;
+        window.InputBox.TextChanged += (_, _) => window.OkButton.IsEnabled = !string.IsNullOrWhiteSpace(window.InputBox.Text);
+        window.OkButton.IsEnabled = !string.IsNullOrWhiteSpace(text);
+        window.Opened += (_, _) =>
+        {
+            window.InputBox.Focus();
+            window.InputBox.SelectAll();
+        };
+
+        return await window.ShowDialog<bool>(owner) ? window.InputBox.Text!.Trim() : null;
     }
 
     private static MessageWindow Create(string title, string message)

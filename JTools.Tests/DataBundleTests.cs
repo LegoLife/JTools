@@ -75,6 +75,14 @@ public sealed class DataBundleTests : IDisposable
     }
 
     [Fact]
+    public void Accepts_regexes_saved_before_the_regex_library_existed()
+    {
+        var json = """{ "app": "JTools", "version": 1, "sections": { "regex": { "Pattern": "x", "SampleText": "y" } } }""";
+
+        Assert.Contains("regex", new DataBundle(_appData).Parse(json).Keys);
+    }
+
+    [Fact]
     public void Rejects_a_file_from_a_newer_version()
     {
         var json = $$"""{ "app": "JTools", "version": {{DataBundle.CurrentVersion + 1}}, "sections": { "expandSnippets": [] } }""";
@@ -90,6 +98,8 @@ public sealed class DataBundleTests : IDisposable
     [InlineData("""{ "app": "Other", "version": 1, "sections": {} }""")]
     [InlineData("""{ "app": "JTools", "version": "1", "sections": {} }""")]
     [InlineData("""{ "app": "JTools", "version": 1, "sections": {} }""")]
+    [InlineData("""{ "app": "JTools", "app": "JTools", "version": 1, "sections": { "expandSnippets": [] } }""")]
+    [InlineData("""{ "app": "JTools", "version": 1, "sections": { "regex": { "Pattern": "x", "Pattern": "y" } } }""")]
     public void Rejects_a_file_that_is_not_a_JTools_bundle(string json)
     {
         Assert.Throws<InvalidDataException>(() => new DataBundle(_appData).Parse(json));
@@ -100,10 +110,12 @@ public sealed class DataBundleTests : IDisposable
     [InlineData("expandSnippets", "[null]")]
     [InlineData("tailHighlights", """[{ "Word": "ERROR", "ColorHex": "not a color" }]""")]
     [InlineData("settings", """{ "Theme": "Purple" }""")]
+    [InlineData("expandSnippets", """[{ "Abbreviation": "brb" }, { "Abbreviation": null, "Expansion": "x" }]""")]
+    [InlineData("regex", """{ "Pattern": "x", "SampleText": "y", "Library": [null] }""")]
     public void Rejects_the_whole_file_when_a_section_is_damaged(string key, string damaged)
     {
         // A good section alongside the damaged one, which mustn't be imported on its own.
-        var json = $$"""{ "app": "JTools", "version": 1, "sections": { "regex": { "Pattern": "x" }, "{{key}}": {{damaged}} } }""";
+        var json = $$"""{ "app": "JTools", "version": 1, "sections": { "tailAppearance": { "FontSize": 14 }, "{{key}}": {{damaged}} } }""";
 
         var error = Assert.Throws<InvalidDataException>(() => new DataBundle(_appData).Parse(json));
         Assert.Contains("nothing was imported", error.Message);

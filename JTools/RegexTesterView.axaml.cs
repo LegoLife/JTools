@@ -35,6 +35,7 @@ public partial class RegexTesterView : UserControl
     /// <summary>Grid column last clicked; a group column outlines that group instead of the whole match.</summary>
     private int _clickedColumn;
     private bool _syncingSelection;
+    private bool _showingLibrary;
 
     public RegexTesterView()
     {
@@ -71,6 +72,8 @@ public partial class RegexTesterView : UserControl
         _runTimer.Tick += (_, _) =>
         {
             _runTimer.Stop();
+            ReadEditors();
+            UpdateLibraryButtons();
             StartRun();
         };
         _saveTimer = new DispatcherTimer { Interval = SaveDelay };
@@ -92,6 +95,8 @@ public partial class RegexTesterView : UserControl
 
         SampleEditor.TextArea.Caret.PositionChanged += (_, _) => SelectRowAtCaret();
         ResultsList.SelectionChanged += OnResultsSelectionChanged;
+        LibraryBox.SelectionChanged += OnLibrarySelectionChanged;
+        RefreshLibrary();
         ResultsList.AddHandler(PointerPressedEvent, OnTablePointerPressed, RoutingStrategies.Tunnel);
         TableScroller.SizeChanged += (_, _) => FitTableWidth();
         BuildTable([]);
@@ -386,6 +391,13 @@ public partial class RegexTesterView : UserControl
     public void SaveState()
     {
         _saveTimer.Stop();
+        ReadEditors();
+        _state.Save();
+    }
+
+    /// <summary>Copies the editors and toggles into the state's working copy.</summary>
+    private void ReadEditors()
+    {
         _state.Pattern = PatternEditor.Text;
         _state.SampleText = SampleEditor.Text;
         _state.IgnoreCase = IgnoreCaseToggle.IsChecked == true;
@@ -393,6 +405,106 @@ public partial class RegexTesterView : UserControl
         _state.Singleline = SinglelineToggle.IsChecked == true;
         _state.IgnorePatternWhitespace = IgnoreWhitespaceToggle.IsChecked == true;
         _state.ExplicitCapture = ExplicitCaptureToggle.IsChecked == true;
-        _state.Save();
+    }
+
+    /// <summary>Lists the saved regexes, with the loaded one selected.</summary>
+    private void RefreshLibrary()
+    {
+        _showingLibrary = true;
+        LibraryBox.ItemsSource = _state.Library.ToList();
+        LibraryBox.SelectedItem = _state.Loaded;
+        _showingLibrary = false;
+        UpdateLibraryButtons();
+    }
+
+    /// <summary>Marks the loaded regex if it's been changed, and enables the buttons that apply.</summary>
+    private void UpdateLibraryButtons()
+    {
+        bool modified = _state.IsModified;
+        ModifiedMark.Opacity = modified ? 1 : 0;
+        LibraryBox.IsEnabled = _state.Library.Count > 0;
+        // With nothing loaded, Save asks for a name like Save As.
+        SaveRegexButton.IsEnabled = _state.Loaded is null || modified;
+        DeleteRegexButton.IsEnabled = _state.Loaded is not null;
+    }
+
+    private void OnLibrarySelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (_showingLibrary || LibraryBox.SelectedItem is not SavedRegex entry)
+        {
+            return;
+        }
+
+        _state.LoadFromLibrary(entry);
+        PatternEditor.Text = entry.Pattern;
+        SampleEditor.Text = entry.SampleText;
+        IgnoreCaseToggle.IsChecked = entry.IgnoreCase;
+        MultilineToggle.IsChecked = entry.Multiline;
+        SinglelineToggle.IsChecked = entry.Singleline;
+        IgnoreWhitespaceToggle.IsChecked = entry.IgnorePatternWhitespace;
+        ExplicitCaptureToggle.IsChecked = entry.ExplicitCapture;
+        SaveState();
+        UpdateLibraryButtons();
+    }
+
+    private async void OnSaveRegexClick(object? sender, RoutedEventArgs e)
+    {
+        if (_state.Loaded is { } loaded)
+        {
+            SaveToLibrary(loaded.Name);
+        }
+        else
+        {
+            await SaveAs();
+        }
+    }
+
+    private async void OnSaveRegexAsClick(object? sender, RoutedEventArgs e) => await SaveAs();
+
+    private async Task SaveAs()
+    {
+        if (TopLevel.GetTopLevel(this) is not Window owner)
+        {
+            return;
+        }
+
+        var name = await MessageWindow.AskText(owner, "Save Regex", "Name:", _state.LoadedName ?? "", "Save");
+        if (name is null)
+        {
+            return;
+        }
+
+        if (_state.Find(name) is { } existing
+            && !await MessageWindow.Confirm(owner, "Save Regex", $"Replace the saved regex \"{existing.Name}\"?", "Replace"))
+        {
+            return;
+        }
+        SaveToLibrary(name);
+    }
+
+    private void SaveToLibrary(string name)
+    {
+        ReadEditors();
+        _state.SaveToLibrary(name);
+        SaveState();
+        RefreshLibrary();
+    }
+
+    private async void OnDeleteRegexClick(object? sender, RoutedEventArgs e)
+    {
+        if (_state.Loaded is not { } loaded || TopLevel.GetTopLevel(this) is not Window owner)
+        {
+            return;
+        }
+
+        var message = $"Delete the saved regex \"{loaded.Name}\"? Its pattern and test text stay in the tester.";
+        if (!await MessageWindow.Confirm(owner, "Delete Regex", message, "Delete"))
+        {
+            return;
+        }
+
+        _state.DeleteLoaded();
+        SaveState();
+        RefreshLibrary();
     }
 }

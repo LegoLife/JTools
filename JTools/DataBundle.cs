@@ -30,7 +30,8 @@ public sealed class DataBundle
             new("settings", "app settings", Path.Combine(jtools, "settings.json"),
                 node => JsonSerializer.Deserialize(node, JsonContext.Default.JToolsSettings) is not null),
             new("regex", "regexes",Path.Combine(jtools, "regex.json"),
-                node => JsonSerializer.Deserialize(node, JsonContext.Default.RegexTesterState) is not null),
+                node => JsonSerializer.Deserialize(node, JsonContext.Default.RegexTesterState) is { Pattern: not null, SampleText: not null } state
+                    && state.Library.All(r => r is { Name: not null, Pattern: not null, SampleText: not null })),
             new("expandSettings", "Expand settings", Path.Combine(expander, "settings.json"),
                 node => JsonSerializer.Deserialize(node, JsonContext.Default.AppSettings) is not null),
             new("expandSnippets", "abbreviations", Path.Combine(expander, "snippets.json"),
@@ -87,7 +88,8 @@ public sealed class DataBundle
         JsonObject? bundle;
         try
         {
-            bundle = JsonNode.Parse(json) as JsonObject;
+            // Checked up front: a duplicate key would otherwise throw from deep inside the sections later.
+            bundle = JsonNode.Parse(json, documentOptions: new JsonDocumentOptions { AllowDuplicateProperties = false }) as JsonObject;
         }
         catch (JsonException)
         {
