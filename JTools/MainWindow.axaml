@@ -90,11 +90,16 @@
                         <TextBlock Classes="label" Text="Tools" />
                     </StackPanel>
                 </Button>
-                <Button DockPanel.Dock="Bottom" Name="DataButton" Classes="nav" ToolTip.Tip="Export or import everything JTools keeps">
+                <Button DockPanel.Dock="Bottom" Name="DataButton" Classes="nav" ToolTip.Tip="Export, import or back up everything JTools keeps">
                     <Button.Flyout>
-                        <MenuFlyout Placement="RightEdgeAlignedBottom">
+                        <MenuFlyout Placement="RightEdgeAlignedBottom" Opening="OnDataMenuOpening">
                             <MenuItem Header="Export…" Click="OnExportClick" />
                             <MenuItem Header="Import…" Click="OnImportClick" />
+                            <Separator />
+                            <MenuItem Name="AutoBackupItem" Header="Back up every 15 minutes" ToggleType="CheckBox" Click="OnAutoBackupClick" />
+                            <MenuItem Header="Backup folder…" Click="OnBackupFolderClick" />
+                            <MenuItem Name="BackupFolderText" IsEnabled="False" />
+                            <MenuItem Name="BackupStatusText" IsEnabled="False" />
                         </MenuFlyout>
                     </Button.Flyout>
                     <StackPanel>

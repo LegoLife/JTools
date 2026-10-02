@@ -28,7 +28,11 @@ public sealed class DataBundle
         _sections =
         [
             new("settings", "app settings", Path.Combine(jtools, "settings.json"),
-                node => JsonSerializer.Deserialize(node, JsonContext.Default.JToolsSettings) is not null),
+                node => JsonSerializer.Deserialize(node, JsonContext.Default.JToolsSettings) is not null)
+            {
+                // Where this PC backs up to: never exported, and kept as it is by an import.
+                MachineKeys = [nameof(JToolsSettings.AutoBackup), nameof(JToolsSettings.BackupFolder)],
+            },
             new("regex", "regexes",Path.Combine(jtools, "regex.json"),
                 node => JsonSerializer.Deserialize(node, JsonContext.Default.RegexTesterState) is { Pattern: not null, SampleText: not null } state
                     && state.Library.All(r => r is { Name: not null, Pattern: not null, SampleText: not null })),
@@ -49,14 +53,17 @@ public sealed class DataBundle
         new(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
 
     /// <summary>The bundle's JSON, holding every data file that exists.</summary>
-    public string Export(DateTimeOffset now)
+    public string Export(DateTimeOffset now) => ToJson(ReadSections(), now);
+
+    /// <summary>The bundle's JSON for sections from <see cref="ReadSections"/>.</summary>
+    public static string ToJson(JsonObject sections, DateTimeOffset now)
     {
         var bundle = new JsonObject
         {
             ["app"] = AppName,
             ["version"] = CurrentVersion,
             ["exported"] = now.ToString("O"),
-            ["sections"] = ReadSections(),
+            ["sections"] = sections,
         };
         return bundle.ToJsonString(Indented);
     }
@@ -69,7 +76,12 @@ public sealed class DataBundle
         {
             try
             {
-                sections[section.Key] = JsonNode.Parse(File.ReadAllText(section.FilePath));
+                var node = JsonNode.Parse(File.ReadAllText(section.FilePath));
+                foreach (var key in section.MachineKeys)
+                {
+                    (node as JsonObject)?.Remove(key);
+                }
+                sections[section.Key] = node;
             }
             catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
             {
@@ -145,11 +157,41 @@ public sealed class DataBundle
                 continue;
             }
 
+            if (section.MachineKeys.Length > 0 && node is JsonObject imported)
+            {
+                node = KeepMachineKeys(section, imported);
+            }
+
             Directory.CreateDirectory(Path.GetDirectoryName(section.FilePath)!);
             var tempPath = section.FilePath + ".tmp";
             File.WriteAllText(tempPath, node.ToJsonString(Indented));
             File.Move(tempPath, section.FilePath, overwrite: true);
         }
+    }
+
+    /// <summary>A copy of an imported section with this PC's values for its machine keys, from the file it replaces.</summary>
+    private static JsonObject KeepMachineKeys(Section section, JsonObject imported)
+    {
+        var result = (JsonObject)imported.DeepClone();
+        JsonObject? current = null;
+        try
+        {
+            current = JsonNode.Parse(File.ReadAllText(section.FilePath)) as JsonObject;
+        }
+        catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
+        {
+            // No settings on this PC yet: the machine keys take their defaults.
+        }
+
+        foreach (var key in section.MachineKeys)
+        {
+            result.Remove(key);
+            if (current?[key] is { } value)
+            {
+                result[key] = value.DeepClone();
+            }
+        }
+        return result;
     }
 
     private static bool IsValid(Section section, JsonNode node)
@@ -179,5 +221,9 @@ public sealed class DataBundle
 
     /// <param name="Key">The section's name in the bundle.</param>
     /// <param name="Name">What the user calls it, in messages.</param>
-    private sealed record Section(string Key, string Name, string FilePath, Func<JsonNode, bool> IsValid);
+    private sealed record Section(string Key, string Name, string FilePath, Func<JsonNode, bool> IsValid)
+    {
+        /// <summary>Top-level properties that belong to this PC rather than the user's data.</summary>
+        public string[] MachineKeys { get; init; } = [];
+    }
 }

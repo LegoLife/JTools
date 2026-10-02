@@ -35,6 +35,12 @@ public sealed class JToolsSettings
     /// <summary>The tool used last, shown when JTools starts.</summary>
     public Tool LastTool { get; set; } = Tool.Tail;
 
+    /// <summary>Whether to back up to <see cref="BackupFolder"/> every 15 minutes and on exit.</summary>
+    public bool AutoBackup { get; set; }
+
+    /// <summary>Where automatic backups go; null until the user picks a folder.</summary>
+    public string? BackupFolder { get; set; }
+
     public bool IsEnabled(Tool tool) => !DisabledTools.Contains(tool);
 
     public static JToolsSettings Load()

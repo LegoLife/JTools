@@ -63,6 +63,7 @@ Windows SmartScreen may warn you the first time because the exe isn't code-signe
 - **Tools** at the bottom of the side bar turns each tool on or off. A tool that's off is hidden and stops running: Tail closes its files, and Expand stops watching the keyboard. One tool always stays on.
 - JTools opens on the tool you used last.
 - **Data** at the bottom of the side bar exports everything JTools keeps (abbreviations, Expand settings, saved regexes, Tail highlights and log appearance, and app settings) to one JSON file, and imports it on another PC. Tail's recent files aren't included. Importing replaces your current data: JTools backs it up first to `%APPDATA%\JToolsackups`, then restarts to load the imported data.
+- **Data** → **Back up every 15 minutes** saves the same file to a folder you choose (OneDrive, say), and once more when JTools exits, but only when something changed. The newest 3 backups are kept, and the Data menu shows when the last one was made. Import a backup to restore it. Where this PC backs up to isn't part of the backup.
 - Dark, Light, or match your Windows setting (**Theme** at the bottom of the side bar).
 - JTools runs from the system tray. Closing the window only hides it, so text expansion keeps working. Quit from the tray menu.
 - Press **Ctrl+Alt+J** in any app to show JTools, or to hide it when it's already in front. If another app already uses that shortcut, the tray menu says so.

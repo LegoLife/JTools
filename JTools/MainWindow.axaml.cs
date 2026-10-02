@@ -18,6 +18,7 @@ public partial class MainWindow : Window
     private JToolsSettings? _settings;
     private ExpanderHost? _expander;
     private DataBundle? _data;
+    private AutoBackup? _autoBackup;
     private Tool _shownTool = Tool.Tail;
 
     /// <summary>Raised when a tool asks to exit the whole app (e.g. JTail's File → Exit).</summary>
@@ -43,6 +44,7 @@ public partial class MainWindow : Window
         _settings = settings;
         _expander = expander;
         _data = data;
+        _autoBackup = new AutoBackup(data, settings);
 
         // A hand-edited settings file could turn everything off, leaving the window empty.
         if (!AllTools.Any(settings.IsEnabled))
@@ -166,6 +168,61 @@ public partial class MainWindow : Window
         }
 
         ImportConfirmed?.Invoke(this, sections);
+    }
+
+    private void OnDataMenuOpening(object? sender, EventArgs e)
+    {
+        var folder = _settings?.BackupFolder;
+        AutoBackupItem.IsChecked = _autoBackup?.IsOn == true;
+        BackupFolderText.Header = folder;
+        BackupFolderText.IsVisible = folder is not null;
+        BackupStatusText.Header = _autoBackup?.Status;
+        BackupStatusText.IsVisible = _autoBackup?.Status is not null;
+    }
+
+    private async void OnAutoBackupClick(object? sender, RoutedEventArgs e)
+    {
+        if (_autoBackup is null)
+        {
+            return;
+        }
+
+        if (_autoBackup.IsOn)
+        {
+            _autoBackup.TurnOff();
+        }
+        else if (_settings?.BackupFolder is { } folder && Directory.Exists(folder))
+        {
+            await TurnOnAutoBackup(folder);
+        }
+        else
+        {
+            await ChooseBackupFolder();
+        }
+    }
+
+    private async void OnBackupFolderClick(object? sender, RoutedEventArgs e) => await ChooseBackupFolder();
+
+    /// <summary>Asks for a backup folder and, if one is chosen, backs up to it from now on.</summary>
+    private async Task ChooseBackupFolder()
+    {
+        var folders = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        {
+            Title = "Choose a Folder for Automatic Backups",
+        });
+        if (folders.Count > 0 && folders[0].TryGetLocalPath() is { } folder)
+        {
+            await TurnOnAutoBackup(folder);
+        }
+    }
+
+    private async Task TurnOnAutoBackup(string folder)
+    {
+        RegexView.SaveState();
+        if (!_autoBackup!.TurnOn(folder))
+        {
+            await MessageWindow.Show(this, "Backup Failed", $"{_autoBackup.Status}\n\nJTools will try again every 15 minutes.");
+        }
     }
 
     private void OnToolItemClick(object? sender, RoutedEventArgs e)
@@ -293,6 +350,7 @@ public partial class MainWindow : Window
         _closingForExit = true;
         TailView.StopTailing();
         RegexView.SaveState();
+        _autoBackup?.Run();
         Close();
     }
 
