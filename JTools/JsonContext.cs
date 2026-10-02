@@ -1,4 +1,6 @@
 using System.Text.Json.Serialization;
+using JTail;
+using TextExpander;
 
 namespace JTools;
 
@@ -6,4 +8,8 @@ namespace JTools;
 [JsonSourceGenerationOptions(WriteIndented = true, UseStringEnumConverter = true)]
 [JsonSerializable(typeof(JToolsSettings))]
 [JsonSerializable(typeof(RegexTesterState))]
+// The other tools' data, read only to check an import before it's written.
+[JsonSerializable(typeof(AppSettings))]
+[JsonSerializable(typeof(List<Snippet>))]
+[JsonSerializable(typeof(List<HighlightRule>))]
 internal sealed partial class JsonContext : JsonSerializerContext;

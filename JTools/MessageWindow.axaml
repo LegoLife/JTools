@@ -1,0 +1,19 @@
+<Window x:Class="JTools.MessageWindow"
+        xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Width="460"
+        SizeToContent="Height"
+        CanResize="False"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+    <DockPanel>
+        <Border DockPanel.Dock="Bottom" Classes="dialogFooter">
+            <StackPanel Classes="buttons">
+                <Button Name="OkButton" Content="OK" Classes="accent" IsDefault="True" Click="OnOkClick" />
+                <Button Name="CancelButton" Content="Cancel" IsCancel="True" Click="OnCancelClick" />
+            </StackPanel>
+        </Border>
+
+        <TextBlock Name="MessageText" Margin="20" TextWrapping="Wrap" />
+    </DockPanel>
+</Window>

@@ -1,5 +1,7 @@
+using System.Text.Json.Nodes;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Platform.Storage;
 
 namespace JTools;
 
@@ -10,13 +12,22 @@ public partial class MainWindow : Window
     /// <summary>Every tool, in side bar order.</summary>
     private static readonly Tool[] AllTools = [Tool.Tail, Tool.Expander, Tool.Regex];
 
+    private static readonly FilePickerFileType DataFileType = new("JTools data") { Patterns = ["*.json"] };
+
     private bool _closingForExit;
     private JToolsSettings? _settings;
     private ExpanderHost? _expander;
+    private DataBundle? _data;
     private Tool _shownTool = Tool.Tail;
 
     /// <summary>Raised when a tool asks to exit the whole app (e.g. JTail's File → Exit).</summary>
     public event EventHandler? ExitRequested;
+
+    /// <summary>
+    /// Raised when the user confirms an import, once their current data is backed up. The app writes the
+    /// sections after every tool has saved and stopped, then restarts.
+    /// </summary>
+    public event EventHandler<IReadOnlyDictionary<string, JsonNode>>? ImportConfirmed;
 
     public MainWindow()
     {
@@ -26,11 +37,12 @@ public partial class MainWindow : Window
         TailView.ExitRequested += (_, _) => ExitRequested?.Invoke(this, EventArgs.Empty);
     }
 
-    /// <summary>Connects the window to the app's settings and expander, and starts the tools that are turned on.</summary>
-    public void Attach(JToolsSettings settings, ExpanderHost expander)
+    /// <summary>Connects the window to the app's settings, expander and data, and starts the tools that are turned on.</summary>
+    public void Attach(JToolsSettings settings, ExpanderHost expander, DataBundle data)
     {
         _settings = settings;
         _expander = expander;
+        _data = data;
 
         // A hand-edited settings file could turn everything off, leaving the window empty.
         if (!AllTools.Any(settings.IsEnabled))
@@ -70,6 +82,90 @@ public partial class MainWindow : Window
         DarkThemeItem.IsChecked = _settings?.Theme == AppTheme.Dark;
         LightThemeItem.IsChecked = _settings?.Theme == AppTheme.Light;
         SystemThemeItem.IsChecked = _settings?.Theme == AppTheme.System;
+    }
+
+    private async void OnExportClick(object? sender, RoutedEventArgs e)
+    {
+        if (_data is null)
+        {
+            return;
+        }
+
+        var file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+        {
+            Title = "Export JTools Data",
+            SuggestedFileName = $"jtools-export-{DateTime.Now:yyyy-MM-dd}.json",
+            DefaultExtension = "json",
+            FileTypeChoices = [DataFileType],
+        });
+        if (file is null)
+        {
+            return;
+        }
+
+        // The tester saves a second after each edit; export what's on screen.
+        RegexView.SaveState();
+        try
+        {
+            await File.WriteAllTextAsync(file.Path.LocalPath, _data.Export(DateTimeOffset.Now));
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            await MessageWindow.Show(this, "Export Failed", ex.Message);
+        }
+    }
+
+    private async void OnImportClick(object? sender, RoutedEventArgs e)
+    {
+        if (_data is null)
+        {
+            return;
+        }
+
+        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Import JTools Data",
+            FileTypeFilter = [DataFileType],
+        });
+        if (files.Count == 0)
+        {
+            return;
+        }
+
+        IReadOnlyDictionary<string, JsonNode> sections;
+        try
+        {
+            sections = _data.Parse(await File.ReadAllTextAsync(files[0].Path.LocalPath));
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidDataException)
+        {
+            await MessageWindow.Show(this, "Can't Import", ex.Message);
+            return;
+        }
+
+        var message =
+            $"This replaces your {_data.Describe(sections.Keys)} with the ones in {files[0].Name}.\n\n" +
+            "Your current data is backed up first, to the backups folder in %APPDATA%\\JTools. " +
+            "JTools then restarts to load the imported data.";
+        if (!await MessageWindow.Confirm(this, "Import JTools Data", message, "Import and Restart"))
+        {
+            return;
+        }
+
+        RegexView.SaveState();
+        try
+        {
+            var folder = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "JTools", "backups");
+            Backups.Write(folder, "before-import", _data.Export(DateTimeOffset.Now), DateTime.Now);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            await MessageWindow.Show(this, "Can't Import", $"Your current data couldn't be backed up, so nothing was imported.\n\n{ex.Message}");
+            return;
+        }
+
+        ImportConfirmed?.Invoke(this, sections);
     }
 
     private void OnToolItemClick(object? sender, RoutedEventArgs e)

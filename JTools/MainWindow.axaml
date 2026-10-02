@@ -90,6 +90,18 @@
                         <TextBlock Classes="label" Text="Tools" />
                     </StackPanel>
                 </Button>
+                <Button DockPanel.Dock="Bottom" Name="DataButton" Classes="nav" ToolTip.Tip="Export or import everything JTools keeps">
+                    <Button.Flyout>
+                        <MenuFlyout Placement="RightEdgeAlignedBottom">
+                            <MenuItem Header="Export…" Click="OnExportClick" />
+                            <MenuItem Header="Import…" Click="OnImportClick" />
+                        </MenuFlyout>
+                    </Button.Flyout>
+                    <StackPanel>
+                        <TextBlock Classes="icon" Text="&#xE74E;" />
+                        <TextBlock Classes="label" Text="Data" />
+                    </StackPanel>
+                </Button>
                 <StackPanel>
                     <Button Name="TailNavButton" Classes="nav" Click="OnTailNavClick" ToolTip.Tip="JTail: tail log files">
                         <Panel>

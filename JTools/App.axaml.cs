@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -15,6 +16,7 @@ public partial class App : Application
 {
     private readonly StartupManager _startup = new("JTools", Program.StartInTrayArgument);
     private readonly JToolsSettings _settings = JToolsSettings.Load();
+    private readonly DataBundle _data = DataBundle.ForCurrentUser();
 
     private IClassicDesktopStyleApplicationLifetime? _desktop;
     private ExpanderHost? _expander;
@@ -37,8 +39,9 @@ public partial class App : Application
             _expander = new ExpanderHost();
 
             _window = new MainWindow();
-            _window.Attach(_settings, _expander);
+            _window.Attach(_settings, _expander, _data);
             _window.ExitRequested += (_, _) => Exit();
+            _window.ImportConfirmed += (_, sections) => ImportAndRestart(sections);
             _hotkey = GlobalHotkey.TryRegister(_window, ToggleMainWindow);
 
             CreateTrayIcon(_expander);
@@ -154,11 +157,33 @@ public partial class App : Application
         }
     }
 
-    private void Exit()
+    /// <summary>
+    /// Writes imported data once every tool has saved and stopped (so nothing overwrites it), then starts
+    /// JTools again to load it.
+    /// </summary>
+    private void ImportAndRestart(IReadOnlyDictionary<string, JsonNode> sections)
+    {
+        Exit(() =>
+        {
+            try
+            {
+                _data.Apply(sections);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                // Restart anyway; the backup taken before the import can be imported to undo a partial write.
+            }
+            Program.RestartAfterExit = true;
+        });
+    }
+
+    /// <param name="afterToolsStop">Runs once the tools have saved their state and stopped.</param>
+    private void Exit(Action? afterToolsStop = null)
     {
         _hotkey?.Dispose();
         _window?.CloseForExit();
         _expander?.Dispose();
+        afterToolsStop?.Invoke();
         _trayIcon?.Dispose();
         _desktop?.Shutdown();
     }
