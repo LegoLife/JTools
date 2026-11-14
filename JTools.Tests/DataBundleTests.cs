@@ -109,7 +109,7 @@ public sealed class DataBundleTests : IDisposable
     [InlineData("expandSnippets", "{}")]
     [InlineData("expandSnippets", "[null]")]
     [InlineData("tailHighlights", """[{ "Word": "ERROR", "ColorHex": "not a color" }]""")]
-    [InlineData("settings", """{ "Theme": "Purple" }""")]
+    [InlineData("settings", """{ "LastTool": "Purple" }""")]
     [InlineData("expandSnippets", """[{ "Abbreviation": "brb" }, { "Abbreviation": null, "Expansion": "x" }]""")]
     [InlineData("regex", """{ "Pattern": "x", "SampleText": "y", "Library": [null] }""")]
     public void Rejects_the_whole_file_when_a_section_is_damaged(string key, string damaged)

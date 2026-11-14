@@ -35,7 +35,6 @@ public partial class App : Application
         {
             _desktop = desktop;
             JTail.ThemeAccent.KeepInSync(this);
-            _settings.ApplyTheme();
             _expander = new ExpanderHost();
 
             _window = new MainWindow();

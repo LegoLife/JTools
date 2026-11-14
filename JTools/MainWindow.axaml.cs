@@ -58,32 +58,8 @@ public partial class MainWindow : Window
             expander.Start();
         }
 
-        UpdateThemeChecks();
         UpdateToolStates();
         ShowTool(settings.IsEnabled(settings.LastTool) ? settings.LastTool : AllTools.First(settings.IsEnabled));
-    }
-
-    private void OnThemeItemClick(object? sender, RoutedEventArgs e)
-    {
-        if (_settings is null)
-        {
-            return;
-        }
-
-        _settings.Theme =
-            sender == LightThemeItem ? AppTheme.Light :
-            sender == SystemThemeItem ? AppTheme.System :
-            AppTheme.Dark;
-        _settings.Save();
-        _settings.ApplyTheme();
-        UpdateThemeChecks();
-    }
-
-    private void UpdateThemeChecks()
-    {
-        DarkThemeItem.IsChecked = _settings?.Theme == AppTheme.Dark;
-        LightThemeItem.IsChecked = _settings?.Theme == AppTheme.Light;
-        SystemThemeItem.IsChecked = _settings?.Theme == AppTheme.System;
     }
 
     private async void OnExportClick(object? sender, RoutedEventArgs e)

@@ -64,19 +64,6 @@
         <Border Grid.Column="0" Background="{DynamicResource JChromeBrush}"
                 BorderBrush="{DynamicResource JBorderBrush}" BorderThickness="0,0,1,0">
             <DockPanel Margin="0,6">
-                <Button DockPanel.Dock="Bottom" Name="ThemeButton" Classes="nav" ToolTip.Tip="Dark or light theme">
-                    <Button.Flyout>
-                        <MenuFlyout Placement="RightEdgeAlignedBottom">
-                            <MenuItem Name="DarkThemeItem" Header="Dark" ToggleType="Radio" GroupName="Theme" Click="OnThemeItemClick" />
-                            <MenuItem Name="LightThemeItem" Header="Light" ToggleType="Radio" GroupName="Theme" Click="OnThemeItemClick" />
-                            <MenuItem Name="SystemThemeItem" Header="Use Windows setting" ToggleType="Radio" GroupName="Theme" Click="OnThemeItemClick" />
-                        </MenuFlyout>
-                    </Button.Flyout>
-                    <StackPanel>
-                        <TextBlock Classes="icon" Text="&#xE706;" />
-                        <TextBlock Classes="label" Text="Theme" />
-                    </StackPanel>
-                </Button>
                 <Button DockPanel.Dock="Bottom" Name="ToolsButton" Classes="nav" ToolTip.Tip="Turn tools on or off">
                     <Button.Flyout>
                         <MenuFlyout Placement="RightEdgeAlignedBottom">

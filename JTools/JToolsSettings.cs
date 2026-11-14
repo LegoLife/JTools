@@ -1,17 +1,6 @@
 using System.Text.Json;
-using Avalonia;
-using Avalonia.Styling;
 
 namespace JTools;
-
-public enum AppTheme
-{
-    Dark,
-    Light,
-
-    /// <summary>Follow the Windows light/dark app mode.</summary>
-    System,
-}
 
 /// <summary>A tool in the side bar.</summary>
 public enum Tool
@@ -26,8 +15,6 @@ public sealed class JToolsSettings
 {
     private static readonly string FilePath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "JTools", "settings.json");
-
-    public AppTheme Theme { get; set; } = AppTheme.Dark;
 
     /// <summary>Tools turned off in the side bar's Tools menu: hidden, and not running.</summary>
     public List<Tool> DisabledTools { get; set; } = [];
@@ -66,16 +53,5 @@ public sealed class JToolsSettings
         {
             // Settings are a convenience; a failed write just means they reset next launch.
         }
-    }
-
-    /// <summary>Switches every window to <see cref="Theme"/>.</summary>
-    public void ApplyTheme()
-    {
-        Application.Current!.RequestedThemeVariant = Theme switch
-        {
-            AppTheme.Light => ThemeVariant.Light,
-            AppTheme.System => ThemeVariant.Default,
-            _ => ThemeVariant.Dark,
-        };
     }
 }
